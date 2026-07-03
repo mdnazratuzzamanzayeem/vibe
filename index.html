@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIBE | Select Your Frequency</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            /* Base Light Mode */
+            --bg-base: #fcfcfd;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.04);
+            --glass-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.08);
+            --glass-glow: 0 0 80px rgba(0, 0, 0, 0.03);
+            --btn-bg: rgba(9, 9, 11, 0.04);
+            --btn-hover: rgba(9, 9, 11, 0.08);
+            --btn-text: #09090b;
+            --btn-primary-bg: #09090b;
+            --btn-primary-text: #ffffff;
+            
+            /* Focus Styles - Light Mode */
+            --focus-color: rgba(0, 0, 0, 0.2);
+            --focus-glow: rgba(0, 0, 0, 0.05);
+
+            /* Default Menu Theme (Mixed) */
+            --blob-1: rgba(255, 100, 150, 0.4);
+            --blob-2: rgba(100, 50, 255, 0.3);
+            --blob-3: rgba(0, 200, 255, 0.4);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Base Dark Mode */
+                --bg-base: #050505;
+                --text-primary: #fafafa;
+                --text-secondary: #a1a1aa;
+                --glass-bg: rgba(20, 20, 20, 0.5);
+                --glass-border: rgba(255, 255, 255, 0.06);
+                --glass-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.5);
+                --glass-glow: 0 0 80px rgba(255, 255, 255, 0.02);
+                --btn-bg: rgba(250, 250, 250, 0.06);
+                --btn-hover: rgba(250, 250, 250, 0.12);
+                --btn-text: #fafafa;
+                --btn-primary-bg: #fafafa;
+                --btn-primary-text: #050505;
+
+                /* Focus Styles - Dark Mode */
+                --focus-color: rgba(255, 255, 255, 0.4);
+                --focus-glow: rgba(255, 255, 255, 0.15);
+
+                /* Default Menu Theme (Mixed) */
+                --blob-1: rgba(120, 30, 200, 0.25);
+                --blob-2: rgba(30, 60, 200, 0.25);
+                --blob-3: rgba(20, 150, 180, 0.2);
+            }
+        }
+
+        /* Dynamic Game Themes (Overrides Blobs) */
+        body.theme-bypass {
+            --blob-1: rgba(168, 85, 247, 0.4); /* Purple */
+            --blob-2: rgba(236, 72, 153, 0.4); /* Pink */
+            --blob-3: rgba(139, 92, 246, 0.4); /* Violet */
+        }
+        body.theme-dare {
+            --blob-1: rgba(239, 68, 68, 0.4);  /* Red */
+            --blob-2: rgba(249, 115, 22, 0.4); /* Orange */
+            --blob-3: rgba(220, 38, 38, 0.4);  /* Crimson */
+        }
+        body.theme-never {
+            --blob-1: rgba(16, 185, 129, 0.4); /* Emerald */
+            --blob-2: rgba(20, 184, 166, 0.4); /* Teal */
+            --blob-3: rgba(132, 204, 22, 0.4); /* Lime */
+        }
+        body.theme-rather {
+            --blob-1: rgba(59, 130, 246, 0.4); /* Blue */
+            --blob-2: rgba(99, 102, 241, 0.4); /* Indigo */
+            --blob-3: rgba(14, 165, 233, 0.4); /* Sky */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: background-color 0.8s cubic-bezier(0.22, 1, 0.36, 1), color 0.8s ease;
+        }
+
+        /* --- TV & D-Pad Focus Styles (Refined) --- */
+        :focus {
+            outline: none;
+        }
+
+        /* Only show focus indicators when navigating via keyboard/D-pad */
+        body.user-is-navigating :focus {
+            outline: 1.5px solid var(--focus-color);
+            outline-offset: 6px;
+            box-shadow: 0 0 25px var(--focus-glow);
+            transition: outline-color 0.2s ease, box-shadow 0.2s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Specific focus scaling for cards */
+        body.user-is-navigating .game-card:focus {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        /* Timed Fade-Out Mechanism */
+        body.user-is-navigating.focus-hidden :focus {
+            outline-color: transparent;
+            box-shadow: 0 0 0px transparent;
+            transition: outline-color 1.2s ease, box-shadow 1.2s ease;
+        }
+
+        /* Interactive Canvas Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Fluid Background Blobs */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: var(--bg-base);
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.7;
+            animation: float 24s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, background-color;
+            transition: background-color 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--blob-1); animation-delay: 0s; }
+        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: var(--blob-2); animation-delay: -5s; animation-duration: 28s; }
+        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: var(--blob-3); animation-delay: -10s; animation-duration: 25s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 10%) scale(1.1); }
+        }
+
+        /* Layout & Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 2.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-icon {
+            background: var(--btn-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--btn-text);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .btn-icon:hover {
+            background: var(--btn-hover);
+            transform: scale(1.1);
+        }
+        
+        .btn-icon:active {
+            transform: scale(0.95) !important;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .view.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            margin: auto;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 0.5rem;
+            line-height: 1.1;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            text-align: center;
+        }
+
+        /* Menu Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .game-card {
+            background: linear-gradient(145deg, var(--glass-bg), transparent);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            opacity: 0.5;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12), var(--glass-glow);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .game-card:active {
+            transform: scale(0.98) !important;
+        }
+
+        .game-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .game-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Specific Card Accents */
+        .card-bypass h2 { background: linear-gradient(135deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-dare h2 { background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-never h2 { background: linear-gradient(135deg, #10b981, #84cc16); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-rather h2 { background: linear-gradient(135deg, #3b82f6, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Custom Prompt Input & Queue (Modal Specific) */
+        .custom-prompt-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #custom-prompt-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.25rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            #custom-prompt-input {
+                background: rgba(255, 255, 255, 0.03);
+            }
+        }
+
+        #custom-prompt-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            #custom-prompt-input:focus {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+
+        .custom-prompt-container .btn-secondary {
+            margin-top: 0;
+            width: 100%;
+        }
+
+        .custom-prompts-list {
+            width: 100%;
+            max-height: 220px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .custom-prompts-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-prompts-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .custom-prompts-list::-webkit-scrollbar-track {
+                background: rgba(255,255,255,0.05);
+            }
+        }
+
+        .custom-prompts-list::-webkit-scrollbar-thumb {
+            background: var(--text-secondary);
+            border-radius: 10px;
+        }
+
+        .custom-prompt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: left;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .custom-prompt-item {
+                background: rgba(255, 255, 255, 0.03);
+            }
+        }
+
+        .custom-prompt-text {
+            flex: 1;
+            word-break: break-word;
+            padding-right: 1rem;
+        }
+
+        .btn-delete-prompt {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete-prompt:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* 3D Card Scene & Play Card */
+        .card-scene {
+            perspective: 1500px;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            z-index: 10;
+        }
+
+        .play-card-inner {
+            position: relative;
+            width: 100%;
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .play-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .play-card-inner:active {
+            transform: scale(0.98);
+        }
+
+        .play-card-inner.is-flipped:active {
+            transform: rotateY(180deg) scale(0.98);
+        }
+
+        .play-card-inner.swipe-out-right {
+            transform: translateX(120%) rotate(15deg) !important;
+            opacity: 0;
+            transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+        }
+
+        .play-card-inner.swipe-out-left {
+            transform: translateX(-120%) rotate(-15deg) !important;
+            opacity: 0;
+            transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+        }
+
+        .play-card-inner.no-transition {
+            transition: none !important;
+        }
+
+        .play-card {
+            background: linear-gradient(145deg, var(--glass-bg), transparent);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: var(--glass-shadow), var(--glass-glow);
+            width: 100%;
+            max-width: 640px;
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Faces for the 3D Card */
+        .play-card-front {
+            transform: rotateY(180deg);
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .play-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-logo-bg {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: 0.25em;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: 3rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .game-header {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            position: absolute;
+            top: 3rem;
+        }
+
+        .question-text {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+            margin: 2rem 0;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Buttons & Actions */
+        .btn {
+            appearance: none;
+            border: none;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
+            font-family: inherit;
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            padding: 1.25rem 2.5rem;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover::after { opacity: 1; }
+        .btn:active { transform: translateY(1px) scale(0.96) !important; }
+
+        .btn-secondary {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+            margin-top: 1rem;
+        }
+        .btn-secondary:hover { background: var(--btn-hover); box-shadow: none; }
+
+        /* Safety Disclaimer */
+        .safety-disclaimer {
+            position: absolute;
+            bottom: 2.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            width: 80%;
+        }
+        .safety-disclaimer.visible { opacity: 1; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-content {
+            background: var(--bg-base);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 3rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            text-align: left;
+            position: relative;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+
+        .modal-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; flex-shrink: 0; }
+        .modal-body { color: var(--text-secondary); line-height: 1.7; font-size: 1.05rem; margin-bottom: 2.5rem; flex-shrink: 0; }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem; right: 1.5rem;
+            background: var(--btn-bg);
+            border: 1px solid var(--glass-border);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .close-modal:hover { color: var(--text-primary); background: var(--btn-hover); transform: rotate(90deg); }
+
+        @media (max-width: 768px) {
+            .game-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.75rem; }
+            .question-text { font-size: 1.75rem; min-height: 140px; }
+            .play-card { padding: 3rem 1.5rem; border-radius: 24px; }
+            .play-card-front { min-height: 380px; }
+            header { padding: 1.5rem; }
+            .modal-content { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body class="theme-menu">
+
+    <!-- Fluid Background -->
+    <div class="background-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Interactive Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Header -->
+    <header>
+        <div class="brand" id="btn-logo" tabindex="0">VIBE</div>
+        <div class="header-controls">
+            <button class="btn-icon" id="btn-home" aria-label="Home" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button class="btn-icon" id="btn-custom" aria-label="Custom Prompts">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <button class="btn-icon" id="btn-about" aria-label="About">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Menu View -->
+        <div id="view-menu" class="view active">
+            <h1>VIBE</h1>
+            <p class="subtitle">Select your frequency.</p>
+            
+            <div class="game-grid">
+                <div class="game-card card-bypass" data-game="bypass" tabindex="0">
+                    <h2>BYPASS</h2>
+                    <p>Skip the small talk. Deep, revealing, and chaotic truths.</p>
+                </div>
+                <div class="game-card card-dare" data-game="dare" tabindex="0">
+                    <h2>Do or Drink</h2>
+                    <p>Brutal dares and chaotic actions. Drink responsibly.</p>
+                </div>
+                <div class="game-card card-never" data-game="never" tabindex="0">
+                    <h2>Never Have I Ever</h2>
+                    <p>Expose your past. The ultimate confession game.</p>
+                </div>
+                <div class="game-card card-rather" data-game="rather" tabindex="0">
+                    <h2>Would You Rather</h2>
+                    <p>Impossible dilemmas and mind-bending choices.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game View -->
+        <div id="view-game" class="view">
+            <div class="card-scene">
+                <div class="play-card-inner" id="play-card" tabindex="0">
+                    <!-- Face Down (Card Back) -->
+                    <div class="play-card play-card-back">
+                        <div class="card-logo-bg">VIBE</div>
+                        <div class="tap-hint">Tap to reveal</div>
+                    </div>
+                    <!-- Face Up (Card Front) -->
+                    <div class="play-card play-card-front">
+                        <div class="game-header" id="game-title-display">Game Title</div>
+                        <div class="question-text" id="question-display">Loading...</div>
+                        <div class="safety-disclaimer" id="safety-text">Drink responsibly. Know your limits. Stop if anyone feels unwell.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End View -->
+        <div id="view-end" class="view">
+            <div class="play-card">
+                <h1>Deck Exhausted</h1>
+                <p class="subtitle">You have played every unique card in this deck.</p>
+                <button class="btn" id="btn-restart">Play Again</button>
+                <button class="btn btn-secondary" id="btn-end-home">Back to Menu</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Prompts Modal -->
+    <div class="modal-overlay" id="modal-custom">
+        <div class="modal-content">
+            <button class="close-modal" id="btn-close-custom" aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="modal-title">Custom Prompts</h2>
+            <div class="modal-body" style="margin-bottom: 0; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+                <p style="margin-bottom: 1.5rem;">Add your own rules, inside jokes, or chaotic dares to the deck.</p>
+                <div class="custom-prompt-container">
+                    <textarea id="custom-prompt-input" placeholder="Add a custom rule or inside joke..."></textarea>
+                    <button class="btn btn-secondary" id="btn-add-prompt">Add to Deck</button>
+                </div>
+                <div id="custom-prompts-list" class="custom-prompts-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Age Verification & Consent Modal -->
+    <div class="modal-overlay" id="modal-consent">
+        <div class="modal-content">
+            <h2 class="modal-title">Age Verification & Consent</h2>
+            <div class="modal-body">
+                <p>By entering VIBE, you confirm that you are of legal age in your jurisdiction.</p>
+                <br>
+                <p><strong>Liability Waiver:</strong> The creators of VIBE explicitly disclaim and waive any and all liability for personal injury, property damage, or any other consequences arising from the use of this app, including but not limited to alcohol consumption. Play safely, know your limits, and never drink and drive.</p>
+            </div>
+            <button class="btn" id="btn-consent-agree" style="width: 100%; max-width: none;">I am of legal age and agree to the terms</button>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal-overlay" id="modal-about">
+        <div class="modal-content">
+            <button class="close-modal" id="btn-close-modal" aria-label="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="modal-title">About VIBE</h2>
+            <div class="modal-body">
+                <p>VIBE is a premium hub for party games designed to cut through superficial conversations and bring chaotic energy.</p>
+                <br>
+                <p><strong>The Engine:</strong> Powered by an unbiased Fisher-Yates shuffle algorithm. No prompt will ever repeat until the entire deck is exhausted.</p>
+                <br>
+                <p>VIBE is a game of choice. 'Drinks' can represent sips of water, points, soda, or forfeits. Never pressure anyone to consume alcohol against their will.</p>
+            </div>
+            <button class="btn btn-secondary" id="btn-modal-action" style="width: 100%; max-width: none;">Got it</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * VIBE - Core Game Logic & Interactive Canvas
+         */
+
+        // --- Interactive Canvas Background (AI Studio Style) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let dots = [];
+        let mouse = { x: -1000, y: -1000 };
+
+        const spacing = 35; 
+        const interactionRadius = 180; 
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            dots = [];
+            for (let x = 0; x < width; x += spacing) {
+                for (let y = 0; y < height; y += spacing) {
+                    dots.push({ ox: x, oy: y, x: x, y: y, vx: 0, vy: 0 });
+                }
+            }
+        }
+
+        window.addEventListener('resize', initCanvas);
+        const updateMouse = (x, y) => { mouse.x = x; mouse.y = y; };
+        window.addEventListener('mousemove', (e) => updateMouse(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => updateMouse(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+        window.addEventListener('mouseout', () => updateMouse(-1000, -1000));
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const baseColor = isDark ? '255, 255, 255' : '0, 0, 0';
+
+            dots.forEach(dot => {
+                const dx = mouse.x - dot.ox;
+                const dy = mouse.y - dot.oy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                let targetX = dot.ox;
+                let targetY = dot.oy;
+                let force = 0;
+
+                if (dist < interactionRadius) {
+                    force = (interactionRadius - dist) / interactionRadius;
+                    targetX = dot.ox + (dx * force * 0.25);
+                    targetY = dot.oy + (dy * force * 0.25);
+                }
+
+                dot.vx += (targetX - dot.x) * 0.08; 
+                dot.vy += (targetY - dot.y) * 0.08;
+                dot.vx *= 0.85; 
+                dot.vy *= 0.85;
+                dot.x += dot.vx;
+                dot.y += dot.vy;
+
+                const opacity = 0.08 + (force * 0.4);
+                const size = 1.2 + (force * 1.5);
+                
+                ctx.fillStyle = `rgba(${baseColor}, ${opacity})`;
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+
+        initCanvas();
+        animateCanvas();
+
+        // --- Refined Spatial Navigation Engine (TV/D-Pad) ---
+        let focusFadeTimeout;
+        const FOCUS_FADE_TIME = 1500;
+
+        function triggerFocusUI() {
+            document.body.classList.add('user-is-navigating');
+            document.body.classList.remove('focus-hidden');
+            clearTimeout(focusFadeTimeout);
+            focusFadeTimeout = setTimeout(() => {
+                document.body.classList.add('focus-hidden');
+            }, FOCUS_FADE_TIME);
+        }
+
+        function getFocusableElements() {
+            const selectors = 'button, [tabindex="0"], input, textarea';
+            let root = document;
+            if (document.querySelector('#modal-consent.active')) root = document.querySelector('#modal-consent');
+            else if (document.querySelector('#modal-custom.active')) root = document.querySelector('#modal-custom');
+            else if (document.querySelector('#modal-about.active')) root = document.querySelector('#modal-about');
+
+            return Array.from(root.querySelectorAll(selectors)).filter(el => {
+                const rect = el.getBoundingClientRect();
+                return el.tabIndex >= 0 && !el.disabled && rect.width > 0 && rect.height > 0;
+            });
+        }
+
+        function getNextFocus(current, elements, key) {
+            const currRect = current.getBoundingClientRect();
+            const currCenter = { x: currRect.left + currRect.width / 2, y: currRect.top + currRect.height / 2 };
+            let bestMatch = null, minDistance = Infinity;
+
+            elements.forEach(el => {
+                if (el === current) return;
+                const rect = el.getBoundingClientRect();
+                const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                let isValid = false;
+                if (key === 'ArrowUp' && center.y < currCenter.y - 5) isValid = true;
+                if (key === 'ArrowDown' && center.y > currCenter.y + 5) isValid = true;
+                if (key === 'ArrowLeft' && center.x < currCenter.x - 5) isValid = true;
+                if (key === 'ArrowRight' && center.x > currCenter.x + 5) isValid = true;
+
+                if (isValid) {
+                    const dx = Math.abs(center.x - currCenter.x), dy = Math.abs(center.y - currCenter.y);
+                    const dist = (key === 'ArrowLeft' || key === 'ArrowRight') ? dx + dy * 3 : dy + dx * 3;
+                    if (dist < minDistance) { minDistance = dist; bestMatch = el; }
+                }
+            });
+            return bestMatch;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+            if (navKeys.includes(e.key)) {
+                e.preventDefault();
+                triggerFocusUI();
+                const elements = getFocusableElements();
+                let current = document.activeElement;
+                if (!elements.includes(current)) { elements[0]?.focus(); return; }
+                const next = getNextFocus(current, elements, e.key);
+                if (next) next.focus();
+            } else if (e.key === 'Enter') {
+                const active = document.activeElement;
+                if (active && active.tagName !== 'TEXTAREA') {
+                    triggerFocusUI();
+                    active.click();
+                }
+            }
+        });
+
+        // Clear navigation mode on mouse/touch
+        window.addEventListener('mousedown', () => {
+            document.body.classList.remove('user-is-navigating');
+            clearTimeout(focusFadeTimeout);
+        });
+        window.addEventListener('touchstart', () => {
+            document.body.classList.remove('user-is-navigating');
+            clearTimeout(focusFadeTimeout);
+        }, {passive: true});
+
+        // --- Game Data (Deduplicated & Curated) ---
+        const gameData = {
+            bypass: [
+                "What is a secret you plan to take to the grave?", "What is the biggest lie you’ve ever told your parents?", "Have you ever stolen something from a friend?", "What’s something you did that you let someone else take the blame for?", "Who is the last person you lied to, and what was the lie?", "What is a secret you know about someone else that could ruin their life?", "Have you ever read someone’s diary or snooped through their phone?", "What is the most illegal thing you have ever done?", "Have you ever faked an emergency to get out of an uncomfortable situation?", "What is a habit you have in private that you’d be mortified if people knew?", "Have you ever eavesdropped on a conversation that broke your heart?", "What is the most elaborate lie you’ve maintained for years?", "Have you ever used someone for personal gain?", "What is something you pretend to hate but secretly love?", "Have you ever lied on a resume to get a job?", "What’s a crime you think you could get away with?", "Who is the one person you’d call if you needed to hide a body?", "Have you ever secretly recorded a conversation?", "What is a rumor you started that actually spread?", "Have you ever lied about your age to get someone’s attention?", "What is the most manipulative thing you’ve ever done?", "Have you ever purposefully ruined someone’s surprise?", "What is something you hide from everyone in this room?", "Have you ever stolen money from a family member?", "What’s the worst thing you’ve done while completely sober?", "Have you ever ghosted someone because you were cowardly?", "What is a secret addiction or vice you hide?", "Have you ever blackmailed someone?", "What is the most you’ve ever lied about your financial status?", "Have you ever pretended to be someone else online?", "What is a conspiracy theory you secretly believe in?", "Have you ever sabotaged a friend's success out of jealousy?", "What is the most sociopathic thought you’ve ever had?", "Have you ever faked being sick to avoid a friend?", "What is the most expensive thing you’ve ever broken and hid?", "Have you ever lied about a relative dying to get out of work?", "What is the most hurtful thing you’ve said behind someone’s back?", "Have you ever knowingly bought stolen goods?", "What is something you’ve lied to yourself about for years?", "Have you ever stayed friends with someone just for their connections?", "What is a dark family secret you were told never to share?", "Have you ever sneaked out and never got caught?", "What is the biggest scam you’ve ever fallen for?", "Have you ever purposely given someone bad advice?", "What is something you do to manipulate people into liking you?", "Have you ever accepted credit for someone else’s work?", "What is the creepiest thing you’ve done to find information about someone?", "Have you ever hacked into someone’s social media?", "What is something you’ve done that would get you fired if your boss knew?", "Have you ever lied about your political beliefs to fit in?", "What is a controversial opinion you hold but never say out loud?", "Have you ever pretended to be drunk to have an excuse for your behavior?", "What is the most two-faced thing you’ve ever done?", "Have you ever stolen a friend’s spotlight on purpose?", "What is a promise you made that you never intended to keep?", "Have you ever faked an orgasm just to make someone go to sleep?", "What is the most unethical thing you’ve done for money?", "Have you ever lied about your identity to a stranger?", "What is something you’ve done that contradicts your moral code?", "Have you ever intentionally lost a game to stroke someone’s ego?", "What is a deep, dark intrusive thought you have frequently?", "Have you ever purposefully ignored a cry for help?", "What is the most cowardly thing you’ve ever done in a crisis?", "Have you ever framed a sibling for something you did?", "What is the worst thing you’ve found out by snooping?", "Have you ever lied about having a traumatic experience?", "What is something you secretly judge your parents for?", "Have you ever shoplifted? What was it?", "What is the most destructive thing you’ve done in anger?", "Have you ever lied to a doctor about your lifestyle habits?", "What is a hidden talent you have that you use for evil?", "Have you ever taken advantage of someone’s vulnerability?", "What is the biggest hypocritical thing you do regularly?", "Have you ever forged someone’s signature?", "What is something you bought that you hid from your partner/family?", "Have you ever faked a personality trait to impress a date?", "What is the most shameful reason you’ve cried?", "Have you ever ruined someone’s relationship on purpose?", "What is something you’ve done that you hope karma forgets about?", "Have you ever lied about an allergy just because you dislike the food?", "What is the darkest joke you’ve ever laughed at?", "Have you ever lied about being religious or spiritual?", "What is the most petty reason you hold a grudge?", "Have you ever intentionally triggered someone’s insecurity?", "What is something you feel guilty about but would do again?", "Have you ever cheated on a major exam?", "What is the worst thing you’ve done out of pure boredom?", "Have you ever lied about where you were born or grew up?", "What is the most toxic trait you refuse to fix?", "Have you ever lied about being single when you weren't?", "What is a secret you kept to maintain your reputation?", "Have you ever participated in something cult-like?", "What is the worst betrayal you’ve ever committed?", "Have you ever lied about hitting someone’s car?", "What is something you’ve done that makes you question if you’re a good person?", "Have you ever hidden a serious illness from loved ones?", "What is the worst way you’ve abused your power?", "Have you ever lied to the police?", "What is the most selfish decision you’ve ever made?", "If you were arrested tomorrow, what would your friends assume you did?"
+            ],
+            dare: [
+                "Call your crush and say “I had a dream about you.”", "Text someone “I can’t stop thinking about your elbows.”", "Eat a spoonful of mustard/ketchup.", "Let someone redraw your eyebrows with a pen.", "Post a weird selfie on your story for 5 minutes.", "Talk in a British accent for 3 rounds.", "Do 20 squats while singing a sad song.", "Let someone write one word on your forehead.", "Try to breakdance for 15 seconds.", "Send your mom “I need to confess something…”", "Let someone style your hair however they want.", "Put water in your mouth and don’t swallow for 1 minute.", "Wear socks on your hands for 3 rounds.", "Dance without music for 20 seconds.", "Let someone check your gallery (1 random photo).", "Let someone roast you for 30 seconds.", "Do your best evil laugh.", "Act like a cat for one round.", "Use a random object as a phone and talk to it.", "Give someone in the group a compliment in a dramatic way.", "Do the worm (or try).", "Close your eyes and guess who touched you.", "Spin around 10 times and walk in a straight line.", "Try to whistle a song (group chooses).", "Speak only in emoji language for one round.", "Let someone send any emoji to your crush.", "Eat a spoon of sugar or salt (your choice).", "Pretend to be someone in the room for 1 minute.", "Do a TikTok dance.", "Whisper everything you say for the next round.", "Hold hands with the person next to you for 1 minute.", "Say your full name dramatically like an anime character.", "Recreate a Bollywood death scene.", "Let someone draw on your arm.", "Eat a raw onion slice.", "Wear a random object as a hat.", "Do the most UNFUNNY joke you know.", "Speak without using your lips for one round.", "Try to juggle 3 random objects.", "Give your phone to someone for 60 seconds.", "Say the alphabet backwards.", "Let someone take your most embarrassing photo.", "Prank call a friend and ask “Did you take my mango?”", "Try to touch your nose with your tongue.", "Act like a baby for 30 seconds.", "Impersonate a teacher.", "Attempt a cartwheel.", "Share a strange fact about yourself.", "Eat one ice cube.", "Keep a straight face while others try to make you laugh.", "Talk like a robot for 2 minutes.", "Sing the national anthem in a sad tone.", "Pretend the floor is lava for 10 seconds.", "Call a friend and ask “Why did you block me?” (even if they didn’t)", "Say two truths and one lie.", "Do 10 pushups (or try).", "Let someone redo your hairstyle blindly.", "Sing everything you say for 3 minutes.", "Hold a weird pose for 30 seconds.", "Sniff someone’s perfume and guess the smell.", "Wear someone else’s shoes for a round.", "Say a cheesy pick-up line.", "Compliment yourself in a braggy tone.", "Let someone rename your contact name.", "Do a slow-motion fall.", "Say something embarrassing you did as a child.", "Reveal your last Google search.", "Call someone and say “I lost the bet.”", "Show your lockscreen.", "Wear a towel or cloth like a cape.", "Walk like a crab.", "Let the group message someone from your phone (you choose who).", "Stare at someone for 15 seconds without blinking.", "Sing the chorus of the last song you listened to.", "Try to speak backwards.", "Describe your crush… without naming them.", "Fake cry for 15 seconds.", "Let someone imitate you.", "Act like you're possessed for 10 seconds.", "Put 3 ice cubes in your shirt.", "Take a selfie with your worst angle.", "Laugh like a clown.", "Snort like a pig for 10 seconds.", "Call someone and say “I’m outside your house.”", "Show your last photo taken.", "Wear a random item as jewelry.", "Let someone draw a moustache on you.", "Eat a slice of lemon.", "Copy the next person’s action for an entire round.", "Share an embarrassing nickname.", "Act like your favorite animal.", "Whisper everyone’s name dramatically.", "Pretend to be a waiter and take orders.", "Do a runway walk.", "Speak in slow motion for a round.", "Try to lick your elbow.", "Tell a ghost story in under 20 seconds.", "Let someone change your phone wallpaper.", "Laugh continuously for 20 seconds.", "Make up a rap about someone in the room.", "Talk like Doraemon for a round.", "Let someone tickle you for 10 seconds.", "Post “hi” to the first person in your chat list.", "Eat a biscuit dipped in water.", "Pretend you're drunk for 30 seconds.", "Show your best ugly face.", "Fake faint dramatically.", "Do a pushup with someone sitting on your back (if safe).", "Roast yourself.", "Compliment the person you tease most.", "Wear lipstick (even if you don't use).", "Hug a pillow and call it your partner.", "Try to wink both eyes one by one.", "Tell a secret (not too personal).", "Let someone pick a random contact to send a sticker.", "Act like a superhero.", "Drink water like it’s juice and exaggerate.", "Try to do the moonwalk.", "Answer every question with “maybe” for 5 minutes.", "Make a new dance and name it.", "Let someone give you a new nickname.", "Talk with your tongue out.", "Pretend to be a news reporter.", "Eat something without using your hands.", "Make the weirdest sound you can.", "Let someone braid your hair (even if short).", "Balance a book on your head for 1 minute.", "Pretend to be scared of your own shadow.", "Say a romantic line to a random object.", "Act like you’re on a cooking show.", "Walk like a runway model.", "Let someone draw a star on your cheek.", "Spin 15 times and try to stand still.", "Tell the group your guilty pleasure.", "Try to draw someone using your non-dominant hand.", "Make a TikTok face.", "Call someone and say “I miss your face.”", "Do a weird handshake with someone.", "Mimic a cartoon character.", "Keep a finger over your upper lip like a moustache.", "Eat something spicy (if possible).", "Give someone a makeover using just your hands.", "Do a dramatic apology.", "Stare at someone’s forehead while talking to them.", "Mimic someone in the room.", "Tell a lie and make everyone believe it.", "Pretend your shoe is a phone.", "Make a heart shape with your body.", "Say “I am beautiful” 10 times dramatically.", "Let someone doodle on your hand.", "Walk backwards for 2 rounds.", "Eat a spoonful of peanut butter or chocolate spread.", "Try to impersonate your dad/mom.", "Sing a lullaby.", "Do a silly dance until someone laughs.", "Reveal your last 3 emojis used.", "Eat a snack without chewing for 5 seconds.", "Show the weirdest photo in your gallery.", "Try to talk without saying vowels.", "Let someone text your sibling “We need to talk.”", "Wear sunglasses (or improvised ones) indoors for a round.", "Do air guitar for 15 seconds.", "Sniff someone’s hair and guess their shampoo.", "Call a random number and whisper “I see you.”", "Pretend to be a villain.", "Pose like a statue for 20 seconds.", "Act like you’re underwater.", "Compliment every person in the room in 1 sentence.", "Say something dramatic in slow motion.", "Say your favorite word 10 times.", "Let someone pick your next dare.", "Eat something blindfolded.", "Say the cheesiest pick-up line you know.", "Pretend to be Siri/Alexa for 1 minute.", "Let someone draw a unibrow on you.", "Walk like a zombie.", "Pretend the floor is ice.", "Take a selfie with everyone.", "Tell the last lie you said.", "Share something you regret buying.", "Call a friend and say “Happy birthday!” (wrong date)", "Raise your eyebrows up and down for 20 seconds.", "Hold your breath for 10 seconds.", "Pretend you're famous and the group are fans.", "Try to talk like Shakespeare.", "Let someone draw a tiny heart on your nose.", "Say a tongue twister 3 times fast.", "Give a 10-second motivational speech.", "Pretend your hand is a puppet and talk to it.", "Act like a shy person meeting their crush.", "Give someone a weird nickname.", "Reveal the last thing you searched online.", "Pretend you’re crying over a snack.", "Share an embarrassing school memory.", "Blow a kiss to the camera/group.", "Do the chicken dance.", "Make a scary face.", "Let someone style your outfit with random items.", "Send “Do you still think about me?” to a random person.", "Let someone choose a person from your contacts to send a 😘 emoji.", "Tell someone “I think I’m falling for you” and don’t explain.", "Eat something while making seductive eye contact with someone.", "Whisper something dramatic into someone’s ear.", "Take a video saying “I’m the hottest here.”", "Let someone send a risky-but-safe compliment from your phone.", "Call someone and breathe heavily for 5 seconds, then hang up.", "Show your typing history from your keyboard suggestions.", "Let someone check your “recently deleted” photos.", "Hold someone’s hand for 1 full minute.", "Flirt with a random object like it’s your crush.", "Text your crush “Guess what?” and don’t reply for 5 minutes.", "Sit on someone’s lap for 10 seconds (if comfortable).", "Let someone read one random chat of their choice.", "Speak in your “flirty voice” for one round.", "Demonstrate how you would confess love.", "Send a voice message saying “I need you rn”—to anyone.", "Let someone screenshot your home screen.", "Show your front camera RIGHT NOW without checking.", "Say “Rate me out of 10 honestly” to someone.", "Try to seduce the camera for 10 seconds.", "Let someone pick a contact and you send a wink 😉.", "Do your best impression of someone when they’re flirting.", "Reveal your biggest turn-off.", "Reveal your biggest turn-on (keep it PG).", "Give someone a dramatic romantic compliment.", "Send “I dreamed about you last night.”", "Let someone choose one chat to scroll for 10 seconds.", "Hug someone VERY tightly for 10 seconds.", "Do a villain laugh into the camera.", "Break into a Bollywood item dance.", "Act like you are giving birth to an idea.", "Do a seductive walk… but dramatically FAIL.", "Pretend you’re possessed by a flirt demon.", "Make your most UNATTRACTIVE pose.", "Confess your love to a water bottle.", "Dance like a dad at a wedding.", "Pretend to propose to a pillow.", "Stare intensely at someone without blinking for 20 sec.", "Post “I’m done with everything” on your status for 2 minutes.", "Let someone change your lockscreen.", "Eat food with your eyes closed—someone feeds you.", "Let someone mess up your hair completely.", "Text someone “I overheard what you said.”", "Call a friend and say “We need to talk.”", "Let someone rename your crush’s contact name.", "Show the last 3 people you stalked.", "Reveal your last voice search.", "Say something sweet to the person on your left.", "Reveal your last compliment received.", "Hold someone’s face gently and say “You’re adorable.”", "Give someone butterfly eyes for 20 seconds.", "Say “I like you. A little too much.” to someone random.", "Pick someone and tell them 3 good things about them.", "Let someone give you a “romantic nickname.”", "Act out your ideal date scenario.", "Whisper “don’t forget me” to someone.", "Let someone write a heart on your cheek.", "Walk like you own the world.", "Say “No one here is on my level.” confidently.", "Strike three model poses.", "Show your best smirk.", "Pretend you're the main character in a drama.", "Make a 10-second “intro scene” of yourself.", "Speak like a mafia boss.", "Say “Don’t fall for me.” while winking.", "Let someone choose your next pose.", "Slow-turn your head like in a music video.", "Act like a fish.", "Do 15 jumping jacks.", "Try to balance an object on your head.", "Dance like a chicken.", "Do 20 seconds of belly dancing (or try).", "Walk on your knees for 10 seconds.", "Hold a plank for 20 seconds.", "Try to whistle loudly.", "Attempt a somersault (if safe).", "Pretend you’re trapped in a box.", "Share the last meme you saved.", "Send “Long time no drama” to someone.", "Post a black screen on your story.", "Let someone choose a random emoji to send to 3 people.", "Reveal your YouTube watch history.", "Let the group create one voice note and send it.", "Change your DP to something funny for 3 minutes.", "Send someone “Do you like surprises?”", "Show your oldest photo in your gallery.", "Send a random “hey cutie” text (anyone group picks).", "Cry dramatically like in a serial.", "Act like a villain losing his powers.", "Pretend you’re confessing to your crush for real.", "Act like you just won a million dollars.", "Give a TED Talk on “Why I’m iconic.”", "Pretend your crush just texted you.", "Give your most sarcastic laugh.", "Act like you’re in a sad rain scene.", "Pretend you’re jealous of someone.", "Perform a dramatic monologue for 20 seconds.", "Share your latest selfie without checking.", "Tell the group who you think is the most attractive here.", "Say a secret fantasy (PG).", "Let someone choose a contact to call you “babe.”", "Attempt a seductive stare for 10 seconds.", "Try to compliment someone… but horribly fail.", "Show your “trying to be cute” pose.", "Reveal the oldest message in your inbox.", "Let someone hold your chin dramatically.", "Touch someone’s nose and say “boop.”", "Talk like a caveman for one round.", "Pretend the ceiling is falling.", "Dance like a malfunctioning robot.", "Speak like you’re underwater.", "Try to touch your feet without bending knees.", "Pretend to be WiFi with low signal.", "Make a sound nobody has ever heard.", "Talk like a witch.", "Act like your soul left your body for 5 seconds.", "Pretend you’re in a horror movie.", "Reveal one person you miss right now.", "Share something you wish you told someone.", "Tell one thing you regret.", "Name someone you’re scared to lose.", "Reveal one thing you want this year.", "State one person you trust the most.", "Describe your dream partner in 3 words.", "Tell your most harmless insecurity.", "Say something honest to the group.", "Whisper a secret to the person on your right.", "Roast someone without using curse words.", "Roast yourself brutally.", "Let someone give you a “savage title.”", "Reveal a habit you hate about yourself.", "Call someone and say “You disappoint me.”", "Say “I’m judging you” with a straight face.", "Pretend to break up with a chair.", "Tell someone they deserve an award—for what?", "Laugh at someone’s joke even if it’s not funny.", "Change your voice to the most annoying pitch for a round.", "Give someone a warm hug.", "Say “I’m proud of you” to someone.", "Pick someone and smile at them for 10 seconds.", "Tell someone what you genuinely admire about them.", "Make a heart with your hands for someone.", "Say a sweet cheesy line like a K-drama hero.", "Give someone a nickname based on their vibe.", "Tell the group your comfort movie.", "Share your favorite memory of a friend here.", "Compliment someone’s smile.", "Give someone a wink—dramatically.", "Say “Stop staring at me, I’m shy.”", "Pretend your crush just walked into the room.", "Blow a kiss randomly.", "Hold someone’s hand suddenly.", "Say “You’re kinda cute, ngl.”", "Pose like a K-pop idol.", "Give someone a nickname like “baby,” “cutie,” etc.", "React like someone just confessed to you.", "Say “Try not to fall for me.”", "Drink 4 sips of your drink.", "Reveal your crush’s initials.", "Let someone DM your crush “hey 😉”.", "Show the group your last 5 photos.", "Let someone pick your next Insta story.", "Share one screenshot (group selects the chat).", "Tell the truth about your last romantic interest.", "Let someone send any emoji from your ID.", "Reveal your red flag.", "Name the person you’d date in the room.", "Give your phone to someone for 30 seconds—no conditions.", "Pretend you’re teleporting.", "Speak like everything is dramatic.", "Become an NPC for 30 seconds.", "Make your body into a weird shape.", "Try to stand on one leg for 20 seconds.", "Attempt a belly laugh.", "Pretend your hair is alive.", "Scream silently (open mouth).", "Act like you’re allergic to air.", "Try to “mind-read” someone.", "Pick someone and imitate them.", "Give someone a 10-second hype speech.", "Let someone choose your next dare.", "Hug the person nearest to you.", "Stare at someone and say “I know your secret.”", "Let someone write a word on your forehead.", "Let someone record you doing a dramatic run.", "Tell someone a secret compliment.", "Sit next to someone you rarely talk to.", "Let someone draw something small on your face.", "Show your lockscreen notification panel.", "Reveal one person you would kiss (hypothetically).", "Send “I miss you” to a person chosen by the group.", "Reveal the last thing you lied about.", "Admit the last time you flirted with someone.", "Let someone pick a chat to open (you can refuse ONLY ONE).", "Call someone and ask “Do you think I’m cute?”", "Send a heart ❤️ to someone unexpected.", "Say the name of your last crush.", "Sit very close to someone for one round.", "Talk in a cartoon voice for the next 3 minutes.", "Sing the alphabet backward (or try).", "Act like a chicken until your next turn.", "Wear socks on your hands for 5 minutes.", "Speak only in rhymes for 2 rounds.", "Imitate someone in the group until someone guesses who.", "Try to do a handstand (or fail gloriously).", "Make your funniest face and hold it for 10 seconds.", "Walk like a crab across the room.", "Pretend you’re a news reporter covering a ridiculous event.", "Try to whistle with crackers in your mouth.", "Say “banana” after every sentence for 5 minutes.", "Attempt your best opera singing.", "Pretend to be a robot with low battery.", "Eat a snack like a squirrel.", "Act like a dramatic Bollywood star confessing love.", "Call someone “my lord” for 3 minutes.", "Talk while holding your tongue.", "Pretend you’re underwater and move accordingly.", "Make animal sounds for 30 seconds.", "Do a slow-motion fight scene alone.", "Copy everything the person next to you does for 2 minutes.", "Try to balance a spoon on your nose.", "Make up a song about toothpaste and sing it.", "Attempt to moonwalk (even if you can’t).", "Pretend to be someone’s bodyguard.", "Act like you're stuck in an invisible box.", "Call your crush “bro” in a sentence (or pretend to).", "Do 10 jumping jacks in the most dramatic way.", "Laugh without smiling.", "Be a DJ and make sound effects for 20 seconds.", "Pretend your shoe is a phone and answer it.", "Act like a baby throwing a tantrum.", "Do your best impression of a grandma/grandpa.", "Pick up an object and sell it like it's precious.", "Try to juggle with socks.", "Pretend you're drunk (but safely & exaggerated).", "Act like you’re in a shampoo commercial.", "Try to speak while holding water in your mouth.", "Walk like a runway model but fail intentionally.", "Compliment everyone using only weird metaphors.", "Pretend to be a cat and demand head pats.", "Be a narrator describing everything someone does.", "Act out your favorite meme.", "Spell your name using your hips.", "Describe your day like a dramatic movie trailer.", "Pretend you're a tour guide in your own house.", "Try to rap about snacks.", "Talk as if you’re a YouTuber doing an apology video.", "Act suspicious for 1 minute (among-us style).", "Pretend you’re turning into a superhero.", "Hug yourself and pretend it's someone famous.", "Make a love confession to your drink.", "Make a 20-second motivational speech about potatoes.", "Act like you’re riding a horse.", "Try to wink both eyes separately.", "Spell out a word with your feet.", "Sniff your elbow dramatically.", "Pretend you’re on a cooking show making an invisible dish.", "Giggle uncontrollably for 20 seconds.", "Act like a lost tourist.", "Give your best evil smirk and hold it.", "Pretend you’re being blown away by strong wind.", "Ask someone for a high-five in the most dramatic way.", "Speak like a robot for 2 turns.", "Make your funniest animal walk.", "Put your forehead on the table and talk.", "Try to balance on one leg for 30 seconds.", "Narrate your own actions like anime characters.", "Laugh like a witch.", "Try to mimic a fish out of water.", "Talk to your hand as if it's your evil twin.", "Pretend your shoe is stuck to the floor and act it out.", "Whisper everything you say for the next minute.", "Shout “BEHOLD!” before speaking for 2 rounds.", "Pretend you’re a teacher scolding misbehaving students.", "Act like you’re doing ASMR with random objects.", "Pretend you’re teaching yoga poses terribly.", "Dance with no rhythm for 20 seconds.", "Act like you’re on a fashion photoshoot.", "Try to imitate a cartoon character of your choice.", "Do your best “villain monologue.”", "Laugh like your favorite emoji.", "Pretend to shrink slowly to the floor.", "Make up a secret handshake with yourself.", "Try to talk with your mouth closed.", "Do the silliest walk you can think of.", "Act like you’re scared of a random object.", "Pretend your hands are puppets giving advice.", "Try to convince everyone that you are a time traveler.", "Stare dramatically out the window and say, “It didn’t have to be this way…”"
+            ],
+            never: [
+                "Never have I ever skipped school while at school.", "Never have I ever lied to my best friend at home.", "Never have I ever cried in public.", "Never have I ever broken a bone.", "Never have I ever cheated in an exam by accident.", "Never have I ever stalked someone on social media on purpose.", "Never have I ever faked being sick and got caught.", "Never have I ever laughed at a serious moment and felt guilty.", "Never have I ever forgot someone’s birthday and never told anyone.", "Never have I ever sent a message to the wrong person and pretended it was normal.", "Never have I ever pulled an all-nighter at school.", "Never have I ever fallen asleep in class.", "Never have I ever copied homework in public.", "Never have I ever ghosted someone online.", "Never have I ever been caught lying by accident.", "Never have I ever lost my phone on purpose.", "Never have I ever broke something expensive and got caught.", "Never have I ever had a crush on a friend and felt guilty.", "Never have I ever talked to myself and never told anyone.", "Never have I ever regretted sending a text and pretended it was normal.", "Never have I ever snooped through a partner's phone.", "Never have I ever stolen something from a store.", "Never have I ever used someone else's toothbrush.", "Never have I ever lied about my age.", "Never have I ever created a fake social media account.", "Never have I ever dropped my phone in the toilet.", "Never have I ever eaten food that fell on the floor past the 5-second rule.", "Never have I ever re-gifted a present.", "Never have I ever blamed a fart on a pet.", "Never have I ever practiced kissing on my hand or a pillow."
+            ],
+            rather: [
+                "Would you rather be able to fly but never land, OR be invisible but everyone knows?", "Would you rather be super strong but be very slow, OR read minds but hear thoughts loudly?", "Would you rather time travel to the past and change nothing, OR time travel to the future and not return?", "Would you rather live without internet for a year, OR live without a phone for the rest of your life?", "Would you rather always be late and miss everything, OR always be early and wait forever?", "Would you rather never need sleep but feel tired, OR sleep 12 hours a day but never dream?", "Would you rather be rich but lonely for the rest of life, OR be poor but happy but struggle daily?", "Would you rather live in the city with no privacy, OR live in the countryside with no peace?", "Would you rather have unlimited money but no freedom, OR have unlimited free time but no money?", "Would you rather be famous and lose privacy, OR stay anonymous and lose all memories?", "Would you rather always have to say everything on your mind, OR never be able to speak again?", "Would you rather have a pause button for your life, OR a rewind button?", "Would you rather fight one horse-sized duck, OR a hundred duck-sized horses?", "Would you rather know how you will die, OR when you will die?", "Would you rather have fingers for toes, OR toes for fingers?", "Would you rather always have a song stuck in your head, OR always have an itch you can't reach?", "Would you rather be forced to dance every time you hear music, OR be forced to sing along to any song you hear?", "Would you rather have a flying carpet, OR a car that can drive underwater?", "Would you rather lose all your teeth, OR lose all your hair?", "Would you rather be the funniest person in the room, OR the smartest person in the room?"
+            ]
+        };
+
+        const gameTitles = {
+            bypass: "BYPASS",
+            dare: "Do or Drink",
+            never: "Never Have I Ever",
+            rather: "Would You Rather"
+        };
+
+        // State Management
+        let activeGame = null;
+        let decks = { bypass: [], dare: [], never: [], rather: [] };
+        let indices = { bypass: 0, dare: 0, never: 0, rather: 0 };
+        let isFlipped = false;
+        let isAnimating = false;
+        let customPrompts = [];
+
+        // DOM Elements
+        const viewMenu = document.getElementById('view-menu');
+        const viewGame = document.getElementById('view-game');
+        const viewEnd = document.getElementById('view-end');
+        
+        const btnHome = document.getElementById('btn-home');
+        const btnLogo = document.getElementById('btn-logo');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnEndHome = document.getElementById('btn-end-home');
+        
+        const playCard = document.getElementById('play-card');
+        const questionDisplay = document.getElementById('question-display');
+        const gameTitleDisplay = document.getElementById('game-title-display');
+        const safetyText = document.getElementById('safety-text');
+        
+        const modalAbout = document.getElementById('modal-about');
+        const btnAbout = document.getElementById('btn-about');
+        const btnCloseModal = document.getElementById('btn-close-modal');
+        const btnModalAction = document.getElementById('btn-modal-action');
+
+        const modalConsent = document.getElementById('modal-consent');
+        const btnConsentAgree = document.getElementById('btn-consent-agree');
+
+        const modalCustom = document.getElementById('modal-custom');
+        const btnCustom = document.getElementById('btn-custom');
+        const btnCloseCustom = document.getElementById('btn-close-custom');
+        const btnAddPrompt = document.getElementById('btn-add-prompt');
+        const customPromptInput = document.getElementById('custom-prompt-input');
+        const customPromptsList = document.getElementById('custom-prompts-list');
+
+        // Fisher-Yates Shuffle Algorithm
+        const shuffleArray = (array) => {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        };
+
+        // LocalStorage Persistence & Consent
+        const checkConsent = () => {
+            try {
+                if (localStorage.getItem('vibe_age_consent') !== 'true') {
+                    modalConsent.classList.add('active');
+                }
+            } catch (e) {
+                // Fallback if localStorage is blocked
+                modalConsent.classList.add('active');
+            }
+        };
+
+        btnConsentAgree.addEventListener('click', () => {
+            try {
+                localStorage.setItem('vibe_age_consent', 'true');
+            } catch (e) {
+                console.warn("Could not save consent state", e);
+            }
+            modalConsent.classList.remove('active');
+        });
+
+        const saveState = () => {
+            try {
+                const state = { activeGame, decks, indices, customPrompts };
+                localStorage.setItem('vibe_game_state', JSON.stringify(state));
+            } catch (e) {
+                console.warn("Could not save state", e);
+            }
+        };
+
+        const loadState = () => {
+            try {
+                const saved = localStorage.getItem('vibe_game_state');
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    
+                    if (state.customPrompts) {
+                        customPrompts = state.customPrompts;
+                        renderCustomPrompts();
+                    }
+                    
+                    if (state.activeGame && state.decks && state.indices) {
+                        activeGame = state.activeGame;
+                        decks = state.decks;
+                        indices = state.indices;
+                        
+                        // Check if exhausted
+                        if (indices[activeGame] >= decks[activeGame].length) {
+                            activeGame = null;
+                            saveState();
+                            return;
+                        }
+                        
+                        initGame(activeGame, true);
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not load state", e);
+                localStorage.removeItem('vibe_game_state');
+            }
+        };
+
+        // View Management
+        const switchView = (hideView, showView) => {
+            hideView.classList.remove('active');
+            setTimeout(() => {
+                hideView.style.display = 'none';
+                showView.style.display = 'flex';
+                void showView.offsetWidth; // Trigger reflow
+                showView.classList.add('active');
+            }, 500);
+        };
+
+        const setTheme = (themeName) => {
+            document.body.className = '';
+            document.body.classList.add(`theme-${themeName}`);
+        };
+
+        // Deck Generation Logic
+        const generateDeck = (gameId) => {
+            let baseArray = gameData[gameId];
+            let finalArray = [...baseArray, ...customPrompts];
+            return shuffleArray(finalArray);
+        };
+
+        // Game Logic
+        const initGame = (gameId, restore = false) => {
+            activeGame = gameId;
+            setTheme(gameId);
+            gameTitleDisplay.textContent = gameTitles[gameId];
+            
+            if (gameId === 'dare') {
+                safetyText.classList.add('visible');
+            } else {
+                safetyText.classList.remove('visible');
+            }
+
+            if (!restore) {
+                decks[gameId] = generateDeck(gameId);
+                indices[gameId] = 0;
+                saveState();
+                
+                switchView(viewMenu, viewGame);
+            } else {
+                // Instant switch for restore
+                viewMenu.classList.remove('active');
+                viewMenu.style.display = 'none';
+                viewGame.style.display = 'flex';
+                void viewGame.offsetWidth; // Force reflow
+                viewGame.classList.add('active');
+            }
+
+            btnHome.style.display = 'flex';
+            updateQuestionUI();
+            resetCardInstantly();
+        };
+
+        const updateQuestionUI = () => {
+            questionDisplay.textContent = decks[activeGame][indices[activeGame]];
+        };
+
+        const goHome = () => {
+            activeGame = null;
+            setTheme('menu');
+            btnHome.style.display = 'none';
+            saveState(); // Clears active session but keeps customPrompts
+            
+            if (viewGame.classList.contains('active')) switchView(viewGame, viewMenu);
+            if (viewEnd.classList.contains('active')) switchView(viewEnd, viewMenu);
+        };
+
+        const restartGame = () => {
+            decks[activeGame] = generateDeck(activeGame);
+            indices[activeGame] = 0;
+            saveState();
+            updateQuestionUI();
+            resetCardInstantly();
+            switchView(viewEnd, viewGame);
+        };
+
+        // 3D Flip & Swipe Animations
+        const resetCardInstantly = () => {
+            playCard.classList.add('no-transition');
+            playCard.classList.remove('swipe-out-right', 'swipe-out-left', 'is-flipped');
+            isFlipped = false;
+            
+            // Force reflow
+            void playCard.offsetWidth;
+            
+            playCard.classList.remove('no-transition');
+        };
+
+        const animateNextCard = (direction = 'left') => {
+            isAnimating = true;
+            
+            const swipeClass = direction === 'right' ? 'swipe-out-right' : 'swipe-out-left';
+            playCard.classList.add(swipeClass);
+            
+            setTimeout(() => {
+                indices[activeGame]++;
+                saveState();
+                
+                if (indices[activeGame] >= decks[activeGame].length) {
+                    switchView(viewGame, viewEnd);
+                    resetCardInstantly();
+                    isAnimating = false;
+                } else {
+                    updateQuestionUI();
+                    resetCardInstantly();
+                    setTimeout(() => {
+                        isAnimating = false;
+                    }, 50);
+                }
+            }, 400);
+        };
+
+        // Event Listeners
+        playCard.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            if (!isFlipped) {
+                playCard.classList.add('is-flipped');
+                isFlipped = true;
+            } else {
+                animateNextCard('left');
+            }
+        });
+
+        // Touch Swipe Logic
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        playCard.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, {passive: true});
+
+        playCard.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            if (!isFlipped || isAnimating) return;
+            
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            
+            // Ensure it's a horizontal swipe
+            if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                animateNextCard(deltaX > 0 ? 'right' : 'left');
+            }
+        }
+
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', () => initGame(card.dataset.game));
+        });
+
+        btnHome.addEventListener('click', goHome);
+        btnLogo.addEventListener('click', goHome);
+        btnRestart.addEventListener('click', restartGame);
+        btnEndHome.addEventListener('click', goHome);
+
+        // Custom Prompt Logic
+        const renderCustomPrompts = () => {
+            customPromptsList.innerHTML = '';
+            customPrompts.forEach((prompt, index) => {
+                const item = document.createElement('div');
+                item.className = 'custom-prompt-item';
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'custom-prompt-text';
+                textSpan.textContent = prompt;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete-prompt';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.setAttribute('aria-label', 'Delete prompt');
+                deleteBtn.onclick = () => {
+                    customPrompts.splice(index, 1);
+                    saveState();
+                    renderCustomPrompts();
+                };
+                
+                item.appendChild(textSpan);
+                item.appendChild(deleteBtn);
+                customPromptsList.appendChild(item);
+            });
+        };
+
+        btnAddPrompt.addEventListener('click', () => {
+            const val = customPromptInput.value.trim();
+            if (val) {
+                customPrompts.push(val);
+                customPromptInput.value = '';
+                saveState();
+                renderCustomPrompts();
+                
+                const originalText = btnAddPrompt.textContent;
+                btnAddPrompt.textContent = 'Added!';
+                setTimeout(() => {
+                    btnAddPrompt.textContent = originalText;
+                }, 1500);
+            }
+        });
+        
+        // Modal Logic
+        btnAbout.addEventListener('click', () => modalAbout.classList.add('active'));
+        const closeAboutModal = () => modalAbout.classList.remove('active');
+        btnCloseModal.addEventListener('click', closeAboutModal);
+        btnModalAction.addEventListener('click', closeAboutModal);
+        modalAbout.addEventListener('click', (e) => { if (e.target === modalAbout) closeAboutModal(); });
+
+        btnCustom.addEventListener('click', () => modalCustom.classList.add('active'));
+        const closeCustomModal = () => modalCustom.classList.remove('active');
+        btnCloseCustom.addEventListener('click', closeCustomModal);
+        modalCustom.addEventListener('click', (e) => { if (e.target === modalCustom) closeCustomModal(); });
+
+        // Initialize State on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkConsent();
+            loadState();
+        });
+
+    </script>
+</body>
+</html>
