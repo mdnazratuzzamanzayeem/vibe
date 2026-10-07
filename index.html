@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Alter</title>
+    <meta name="description" content="Alter: Dispatches and essays on education, society, and culture. A sanctuary for focused editorial reading." />
+    <meta property="og:title" content="Alter" />
+    <meta property="og:description" content="Alter: Dispatches and essays on education, society, and culture. A sanctuary for focused editorial reading." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#242424" />
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <script>
+      // Guard against extension scripts attempting to overwrite window.fetch in environments where it only has a getter
+      (function() {
+        try {
+          var _rawFetch = window.fetch;
+          var _customFetch = _rawFetch;
+
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return _customFetch || _rawFetch;
+            },
+            set: function(val) {
+              _customFetch = val;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          try {
+            var proto = Object.getPrototypeOf(window);
+            if (proto) {
+              var pFetch = proto.fetch || window.fetch;
+              Object.defineProperty(proto, 'fetch', {
+                get: function() {
+                  return proto.__fetchOverride || pFetch;
+                },
+                set: function(val) {
+                  proto.__fetchOverride = val;
+                },
+                configurable: true,
+                enumerable: true
+              });
+            }
+          } catch (err) {}
+        }
+
+        // Suppress unhandled errors originating from injected chrome-extension scripts
+        window.addEventListener('error', function(event) {
+          if (event && event.filename && event.filename.indexOf('chrome-extension://') !== -1) {
+            event.preventDefault();
+            return true;
+          }
+        });
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+  
+    <style>
+
+
+:root {
+  --bg-color: #e8e6e1;
+  
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(24px);
+  
+  --glass-hover: rgba(255, 255, 255, 0.65);
+  --glass-active: rgba(255, 255, 255, 0.85);
+  --glass-active-border: rgba(255, 255, 255, 0.95);
+  
+  --text-main: #1a1a1a;
+  --text-muted: #555555;
+  --text-light: #7b7b80;
+  
+  --input-bg: rgba(255, 255, 255, 0.5);
+  --input-focus: rgba(255, 255, 255, 0.8);
+  --input-border: rgba(255, 255, 255, 0.7);
+  --input-focus-border: rgba(0, 0, 0, 0.25);
+  
+  --btn-bg: #1a1a1a;
+  --btn-text: #ffffff;
+  --btn-hover: #333333;
+  
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg-color: #0f0f14;
+  
+  --glass-bg: rgba(18, 18, 25, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  --glass-hover: rgba(30, 30, 42, 0.7);
+  --glass-active: rgba(42, 42, 58, 0.85);
+  --glass-active-border: rgba(255, 255, 255, 0.2);
+  
+  --text-main: #f5f5f7;
+  --text-muted: #a1a1a6;
+  --text-light: #73737a;
+  
+  --input-bg: rgba(0, 0, 0, 0.35);
+  --input-focus: rgba(0, 0, 0, 0.55);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-focus-border: rgba(255, 255, 255, 0.3);
+  
+  --btn-bg: #f5f5f7;
+  --btn-text: #0f0f14;
+  --btn-hover: #d2d2d7;
+  
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-main);
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  zoom: 1;
+}
+
+/* Phone-specific default focus / zoom: 67% (0.67) for phones, normal (1.0) for other devices */
+@media (max-width: 768px) {
+  body {
+    zoom: 0.67;
+  }
+}
+
+/* Subtle Animated Ambient Mesh */
+.bg-mesh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-image: 
+      radial-gradient(circle at 15% 25%, rgba(232, 218, 208, 0.9) 0%, transparent 45%),
+      radial-gradient(circle at 75% 15%, rgba(215, 222, 230, 0.9) 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(225, 215, 225, 0.9) 0%, transparent 45%),
+      radial-gradient(circle at 25% 80%, rgba(210, 220, 215, 0.9) 0%, transparent 45%);
+  filter: blur(35px);
+  animation: breathe 16s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+      radial-gradient(circle at 15% 25%, rgba(20, 25, 45, 0.95) 0%, transparent 45%),
+      radial-gradient(circle at 75% 15%, rgba(15, 22, 35, 0.95) 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(32, 20, 38, 0.95) 0%, transparent 45%),
+      radial-gradient(circle at 25% 80%, rgba(16, 32, 32, 0.95) 0%, transparent 45%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+[data-theme="dark"] .bg-mesh::after {
+  opacity: 1;
+}
+
+@keyframes breathe {
+  0% { transform: scale(1) translateZ(0); }
+  100% { transform: scale(1.06) translateZ(0); }
+}
+
+/* Glass panel */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Heading font class */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Prose formatting */
+.editorial-prose {
+  color: var(--text-muted);
+}
+
+.editorial-prose p {
+  line-height: 1.85;
+  margin-bottom: 1.75rem;
+  text-align: justify;
+}
+
+.editorial-prose h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+  color: var(--text-main);
+  margin: 3.5rem 0 1.25rem 0;
+  font-weight: 700;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 0.6rem;
+  text-align: left;
+}
+
+.editorial-prose h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.35rem, 2.5vw, 1.65rem);
+  color: var(--text-main);
+  margin: 2.75rem 0 1rem 0;
+  font-weight: 600;
+}
+
+.editorial-prose ul {
+  margin: 1.5rem 0 1.75rem 1.25rem;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.editorial-prose li {
+  margin-bottom: 0.85rem;
+  line-height: 1.75;
+}
+
+.editorial-prose strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.editorial-prose blockquote {
+  border-top: 2px solid var(--text-main);
+  border-bottom: 2px solid var(--text-main);
+  padding: 2rem 1.75rem;
+  margin: 2.75rem auto;
+  font-style: italic;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  color: var(--text-main);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: var(--glass-shadow);
+}
+
+.editorial-prose blockquote footer {
+  font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom-server-browser.production.min.js"></script>
+    <script>
+      window.process = { env: { NODE_ENV: 'production' } };
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+    
+    <script type="text/babel" data-presets="react,typescript">
+
+const { useState, useEffect, useRef } = React;
+
+const Icon = ({ path, className, ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    {path}
+  </svg>
+);
+
+const Clock = (p) => <Icon {...p} path={<React.Fragment><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></React.Fragment>} />;
+const Search = (p) => <Icon {...p} path={<React.Fragment><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></React.Fragment>} />;
+const BookOpen = (p) => <Icon {...p} path={<React.Fragment><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></React.Fragment>} />;
+const ArrowLeft = (p) => <Icon {...p} path={<React.Fragment><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></React.Fragment>} />;
+const ArrowRight = (p) => <Icon {...p} path={<React.Fragment><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></React.Fragment>} />;
+const Share2 = (p) => <Icon {...p} path={<React.Fragment><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></React.Fragment>} />;
+const Check = (p) => <Icon {...p} path={<polyline points="20 6 9 17 4 12"/>} />;
+const Calendar = (p) => <Icon {...p} path={<React.Fragment><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></React.Fragment>} />;
+const Home = (p) => <Icon {...p} path={<React.Fragment><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></React.Fragment>} />;
+const User = (p) => <Icon {...p} path={<React.Fragment><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></React.Fragment>} />;
+const Mail = (p) => <Icon {...p} path={<React.Fragment><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></React.Fragment>} />;
+const Moon = (p) => <Icon {...p} path={<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>} />;
+const Sun = (p) => <Icon {...p} path={<React.Fragment><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></React.Fragment>} />;
+const Send = (p) => <Icon {...p} path={<React.Fragment><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></React.Fragment>} />;
+const Loader2 = (p) => <Icon {...p} path={<path d="M21 12a9 9 0 1 1-6.219-8.56"/>} className={"animate-spin " + (p.className||"")} />;
+const CheckCircle2 = (p) => <Icon {...p} path={<React.Fragment><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></React.Fragment>} />;
+const AlertCircle = (p) => <Icon {...p} path={<React.Fragment><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></React.Fragment>} />;
+
+// --- src/data/articles.ts ---
+interface Article {
+  id: string;
+  tag: string;
+  category: 'society' | 'education' | 'policy';
+  title: string;
+  shortTitle: string;
+  subtitle: string;
+  date: string;
+  readTime: string;
+  excerpt: string;
+  featured?: boolean;
+}
+
+const ARTICLES: Article[] = [
+  {
+    id: 'post-movement',
+    tag: 'Society & Human Rights',
+    category: 'society',
+    title: 'The Country Half Its People Cannot Freely Move Through: Patriarchy, Harassment, and the Family Travel Trap',
+    shortTitle: 'The Country Half Its People Cannot Freely Move Through',
+    subtitle: 'Patriarchy, Sexual Violence, and the Retreat from Public Space in Bangladesh',
+    date: 'October 5, 2026',
+    readTime: '12 min read',
+    featured: true,
+    excerpt: 'In the streets, villages, and even homes of Bangladesh in 2026, women and children live in perpetual fear. No neighbourhood feels safe. No hour of the day guarantees security. Almost daily, reports emerge of rape, gang rape, sexual assault, and murders following these violations. This is not a sporadic crisis; it is a national emergency that exposes the hollow promises of governance.'
+  },
+  {
+    id: 'post-period',
+    tag: 'Society & Health',
+    category: 'society',
+    title: "Why Does Half the Population Bleed in Silence? The Period Chapter Bangladesh's Classrooms Forgot to Teach — And Every Brother, Father, Son, Husband, and Boyfriend Needs to Read",
+    shortTitle: 'Why Does Half the Population Bleed in Silence?',
+    subtitle: 'Every single month, roughly half the people in Bangladesh and South Asia who are of reproductive age go through something that is completely normal, biologically unremarkable, and utterly essential to human continuation — and yet, somehow, it remains one of the most unspeakable subjects in the region. Not a disease. Not a disorder. A period.',
+    date: 'September 9, 2026',
+    readTime: '8 min read',
+    excerpt: 'Every single month, roughly half the people in Bangladesh and South Asia who are of reproductive age go through something that is completely normal, biologically unremarkable, and utterly essential to human continuation — and yet, somehow, it remains one of the most unspeakable subjects in the region.'
+  },
+  {
+    id: 'post-tabs',
+    tag: 'Technology & Policy',
+    category: 'policy',
+    title: 'Free Tabs for SSC Toppers: A Good Idea Bangladesh Has Failed to Execute Before — Will 2026 Be Different?',
+    shortTitle: 'Free Tabs for SSC Toppers',
+    subtitle: "A look at the newly announced device giveaway for SSC 2026's GPA-5 achievers, read against the country's track record with the Doel laptop and its unresolved e-waste crisis.",
+    date: 'September 9, 2026',
+    readTime: '6 min read',
+    excerpt: "A look at the newly announced device giveaway for SSC 2026's GPA-5 achievers, read against the country's track record with the Doel laptop and its unresolved e-waste crisis."
+  },
+  {
+    id: 'post-collapse',
+    tag: 'Education & Reform',
+    category: 'education',
+    title: 'The Silent Collapse',
+    shortTitle: 'The Silent Collapse',
+    subtitle: 'How the HSC Exam Debacle Exposed the Broken Foundation of Bangladesh’s Education System',
+    date: 'July 9, 2026',
+    readTime: '9 min read',
+    excerpt: 'For decades, we have comforted ourselves with a comforting illusion: that a rising pass rate and an explosion of GPA-5 achievements in our public examinations meant our youth were marching toward a brighter, more competitive future. That illusion has shattered.'
+  }
+];
+
+
+// --- src/components/ArticlePostMovement.tsx ---
+
+
+const ArticlePostMovement: React.FC = () => {
+  return (
+    <div className="editorial-prose">
+      <h2>Introduction: A National Emergency in the Making</h2>
+      <p>
+        In the streets, villages, and even homes of Bangladesh in 2026, women and children live in perpetual fear. No neighbourhood feels safe. No hour of the day guarantees security. Almost daily, reports emerge of rape, gang rape, sexual assault, and murders following these violations. This is not a sporadic crisis; it is a national emergency that exposes the hollow promises of governance. The data are unambiguous and the trajectory is alarming: Bangladesh recorded 7,068 rape cases filed in 2025, up from 5,570 in 2024—a more than 27% increase—while nearly 70% of victims were girls under the age of eighteen. Sexual harassment, meanwhile, remains so widespread that 84% of women in general and 76% of female students report experiencing it in workplaces, public spaces, and higher educational institutions.
+      </p>
+
+      <p>
+        These are not isolated statistics. They are the measurable symptoms of a deeply entrenched patriarchal order that subordinates women, normalises male violence, and systematically denies justice to survivors. The consequence is a cascading withdrawal of women—and the families who depend on them—from public life, public transport, tourism, and independent travel. This analysis examines how patriarchy, rape, harassment, and molestation converge in Bangladesh to create an environment in which solo female travellers are effectively deterred and families increasingly restrict their own mobility, compounding a broader crisis of safety and dignity.
+      </p>
+
+      <h2>The Patriarchal Foundation: Structural Inequality and the Culture of Impunity</h2>
+      <p>
+        Patriarchy in Bangladesh is not merely a set of attitudes; it is a structural system that creates and perpetuates unequal power dynamics, limiting women's access to education and employment, political participation, property ownership, and decision-making, while exposing them to discrimination and violence. The United Nations Population Fund ranks Bangladesh 131 out of 162 countries on its Gender Inequality Index, highlighting persistent gaps in health, empowerment, and labour market participation. This is a society in which women's subordinate roles are not incidental but foundational.
+      </p>
+
+      <p>
+        Rights activists in Bangladesh consistently identify this patriarchal mindset as the root cause of continued violence. Kamrun Nahar, a member of the Women's Affairs Commission, has stated plainly that "the mindset of not treating women as equal human beings was one of the root causes behind the continued violence against women and girls," adding that "the prevailing culture of impunity, social attitude towards girls and women, and victim-blaming are main reasons for the menace". The pervasive patriarchy of Bangladeshi society is such that sexual abusers can enjoy political immunity, nurtured by a system that keeps women and girls trapped in a continuum of sexual and gender-based violence.
+      </p>
+
+      <p>
+        The culture of impunity is not an accident; it is a product of a legal and political order that overwhelmingly prioritises the reputations and futures of perpetrators over the safety and dignity of victims. Victim-blaming is endemic. A UNDP analysis notes that patriarchal society "by itself creates a culture of impunity where perpetrators may be considered to be driven to commit acts of violence, especially sexual violence due to the behaviour, attire or conduct of the victims". This logic—which locates culpability in the victim rather than the perpetrator—is the ideological scaffolding that permits sexual violence to continue largely unchecked.
+      </p>
+
+      <p>
+        The justice system compounds this impunity through abysmal conviction rates. Police statistics show that only 2.61% of women-related cases and 0.52% of child-related cases resulted in convictions in early 2025, compared with an overall criminal conviction rate of approximately 28%. A joint study by the Supreme Court of Bangladesh and BRAC found that only 3% of cases involving violence against women and children ended in conviction, while 70% resulted in acquittal. Of the 7,068 rape cases recorded in 2025, only around 3% ended with punishment, while nearly 70% resulted in acquittal. Over 150,000 cases involving women and children remain pending nationwide, with each specialised tribunal handling more than 1,500 cases, overwhelming judges and staff and rendering the statutory 180-day deadline for trial completion a dead letter. Survivors are trapped in a legal limbo that can drag on for five years or more, during which witnesses become unavailable, evidence deteriorates, and victims face pressure to withdraw complaints.
+      </p>
+
+      <p>
+        This institutional failure is compounded by the fact that certain offences, such as rape and sexual abuse, are associated with shame and social stigma for the victim, which makes many survivors refrain from reporting such crimes. Even the medical-legal process can retraumatise survivors: the practice of two-finger tests, for example, is deeply embedded in patriarchal values where female sexual morality is prioritised in assessing the legitimacy of a rape claim. The result is a near-total breakdown in accountability. As one analysis concludes, "the law promises speed, but the system struggles to deliver".
+      </p>
+
+      <h2>The Rape Epidemic: Numbers Behind the Crisis</h2>
+      <p>
+        The scale of sexual violence in Bangladesh has escalated dramatically in recent years, and the data reveal not only a surge in incidents but a disturbing shift in who is targeted.
+      </p>
+
+      <p>
+        In 2025, the country saw 786 documented cases of rape and gang rape, a staggering 52.3% increase from the previous year. Of these, 543 were girls under 18, reflecting a nearly 48% rise in child victims, while gang rapes alone accounted for 179 incidents. Police headquarters data corroborates the alarm: 7,068 rape cases filed in 2025, up from 5,570 in 2024. The trend has accelerated into 2026. Ain o Salish Kendra (ASK) reported 35 rape cases in January 2026 alone—25 single rapes and 10 gang rapes—with 13 victims aged 12 or younger. At least 23 minor girls and nine women were raped in February 2026, while 17 minor girls and 14 women were raped in January. Between January 2025 and February 2026, a total of 815 rape cases were reported, of which 366 involved minors aged 18 or less. In the first seven months of 2026 alone, 485 child rape cases were registered—a nearly 49% increase compared to the same period in 2025 and a nearly 98% increase compared to 2024.
+      </p>
+
+      <p>
+        These figures represent only reported cases. Activists consistently note massive underreporting due to stigma, fear of reprisal, weak policing, and societal pressure, meaning the true numbers likely run far higher. Even as government officials claim a decrease in rape incidents in parliamentary statements, the documentation from human rights organisations and media monitoring paints a starkly different picture of a crisis spiralling beyond control.
+      </p>
+
+      <p>
+        The targeting of children is perhaps the most harrowing dimension of this epidemic. In 2025, nearly 70% of all rape victims were girls under the age of eighteen. ASK recorded cases in which 48 children under the age of six had been raped in January–June 2025, compared to 14 cases in the same period in 2024; 86 cases of victims aged 7–12, compared to 40; and 94 cases of victims aged 13–18, compared to 50. The brutality extends beyond the act itself: in Narsingdi, a 15-year-old girl was abducted in front of her father and murdered on February 25, 2026, two weeks after she had been raped. When her family attempted to go to the police station after the rape, the perpetrators intercepted them and forced them to return home. A union parishad member settled the matter through social arbitration. Because the girl was still being stalked, her father decided to move her to safety—and on the way, they were intercepted, the girl abducted and killed. In a separate incident, a seven-year-old girl was found with her throat slit at Sitakunda Eco Park, having been subjected to attempted rape.
+      </p>
+
+      <p>
+        These cases illustrate not only the depravity of the violence but the systemic failure to protect victims and hold perpetrators accountable. In case after case, the pattern repeats: assault, followed by pressure to settle informally, followed by further violence, and ultimately by the loss of life.
+      </p>
+
+      <h2>Harassment and Molestation: The Everyday Terror of Public Space</h2>
+      <p>
+        While rape represents the most extreme manifestation of patriarchal violence, it is the pervasive, quotidian nature of sexual harassment that most directly shapes women's daily lives and restricts their mobility. Sexual harassment remains widespread in Bangladesh, with 84% of women in general and 76% of female students reporting experiences in workplaces, public spaces, and educational institutions. In public transport specifically, the figures are similarly damning: a 2024 BRAC study found that nearly 79% of female commuters have experienced sexual harassment on public transport, with 60% feeling traumatised and approximately one in every six female commuters facing sexual harassment daily. A 2022 survey found that 87% of women surveyed had experienced harassment at least once, while 36% said they regularly faced sexual harassment on public transport. According to ActionAid Bangladesh, 84% of women have experienced sexual harassment on public transport at some point in their lives.
+      </p>
+
+      <p>
+        A cross-sectional study of 504 women conducted in March–April 2025 provides granular insight into the mechanics of this harassment and its consequences for mobility. According to the study, 34% of respondents faced verbal harassment during travel, 8% faced physical harassment, and 21% faced both types of harassment. Only 16% felt safe all the time, while more than half did not go to certain places for fear of harassment. Critically, 60% were prevented from going out alone, and 17% from engaging in community activities. Only 30% of victims reported to legal authorities. The study revealed that "a significant proportion of women experience harassment—both verbal and physical—during travel, with buses, rickshaws, and walking" being the primary contexts in which it occurs.
+      </p>
+
+      <p>
+        The situation is particularly acute on public transport, where crowded conditions provide cover for predatory behaviour. Women passengers report that "incidents of inappropriate touching, deliberate physical contact and sexual harassment regularly occur taking advantage of overcrowded buses". The lack of space and constant pushing makes women more vulnerable to unwanted touching and other forms of harassment. Even women-only bus services, introduced as a partial remedy, cannot solve the wider problem: one analysis notes that Dhaka's new pink bus service "offers women a safer and more comfortable way to travel, but it cannot solve the wider problem of harassment and insecurity". Moreover, the pink buses themselves face operational challenges, including long wait times, sparse schedules, and "deeply entrenched hostility from a male-dominated transport ecosystem".
+      </p>
+
+      <p>
+        Long-distance travel carries particularly severe risks. Highway robberies in which criminal gangs board buses, take control of them using knives and machetes, loot passengers, and sexually assault female passengers have become a recurring nightmare. In February 2025, several women were assaulted during such a robbery on the Dhaka–Tangail route. Despite protests demanding safety for women in public spaces and the deployment of additional police forces along northern routes, a strikingly similar incident occurred just three months later on the same route. The case statement for the May 2025 robbery described how robbers boarded the bus posing as passengers, took control of it, looted passengers, and sexually assaulted several female passengers, driving the bus for several hours before disembarking. Similar incidents occurred in 2023 and 2022 as well, yet trials have yet to begin due to procedural and legal loopholes, and lax enforcement clearly emboldens criminals.
+      </p>
+
+      <p>
+        The fear extends beyond physical spaces into the digital realm. A study on technology-facilitated sexual harassment among young-adult female students in Bangladesh found that nearly half of respondents (46.1%) reported experiencing such harassment, with the prevalence of suicidal thoughts, moderate to severe distress, stress, and anxiety ranging from 47.7% to 78.2%. Among women journalists, 60% reported verbal harassment compared with 9% of men, while online harassment was reported by 48% of women and 15% of men, and physical harassment by 24% of women and 7% of men.
+      </p>
+
+      <h2>The Deterrence Effect: How Fear Restructures Mobility and Travel</h2>
+      <p>
+        The cumulative effect of pervasive sexual violence and harassment is a profound restructuring of women's relationship to public space—and, by extension, of family travel decisions and the tourism sector as a whole.
+      </p>
+
+      <p>
+        International travel advisories explicitly warn women against travelling alone in Bangladesh. The French Ministry for Europe and Foreign Affairs advises that from arrival in Bangladesh, it is essential, particularly for women and especially those travelling alone, to take certain precautions, strongly advising women not to go out alone in the evening and to avoid finding themselves alone with a taxi driver, for example. Italian travel advisories similarly recommend particular caution for women travelling alone or in small groups, advising against using public transport or occasional means of transport, against accompanying strangers, and against isolated areas at any hour of the day or night. The U.S. Department of State assesses that travellers should reconsider travel to Bangladesh due to crime, terrorism, civil unrest, and kidnapping, with a Crime Indicator indicating widespread violent crime and/or organized crime and limited local law enforcement capacity to respond to serious crimes.
+      </p>
+
+      <p>
+        These official warnings reflect the lived reality of women in Bangladesh. The study on women's mobility and public harassment found that 60% of women were prevented from going out alone, and more than half did not go to certain places for fear. A woman in her 30s from Dhaka has likened the situation to "unseen chains of fear," describing how the constant threat of harassment and assault constrains her movement and choices. The United Nations Development Programme has noted that the kind of obstacles women face in terms of mobility and due to people's behaviour is "unimaginable," with women workers living in constant fear of losing their jobs or being silenced.
+      </p>
+
+      <p>
+        For solo female travellers, the situation is particularly fraught. A female tourist who set out to travel across Bangladesh on foot was harassed in Lalmonirhat, with police arresting a local man who allegedly harassed her and attempted to outrage her modesty. In another incident, a female tourist travelling on foot in Bangladesh was harassed by a 31-year-old local resident when she sought to use a toilet at a private residence. Even at points of departure, women travelling alone face institutional harassment: immigration officials have subjected unmarried women travelling abroad to intrusive questions about their personal lives, with three young women stopped from travelling to Nepal and sent back from the airport, prompting them to move the High Court.
+      </p>
+
+      <p>
+        The deterrence effect extends to families. In a particularly telling incident in Cox's Bazar, a woman visiting with her husband and eight-month-old child was raped. The district administration subsequently cancelled a separate zone for female and children tourists on Cox's Bazar sea beach—a zone that had been inaugurated only hours earlier. This episode encapsulates the contradictory impulses at work: the recognition that women and children need dedicated safe spaces, followed by the retraction of that recognition in the face of the very violence it was designed to address. For families contemplating travel within Bangladesh, the message is unambiguous: even a woman accompanied by her husband and infant is not safe.
+      </p>
+
+      <p>
+        The tourism sector has begun to recognise the economic consequences of this safety deficit. A government tourism portal notes that when foreign investors see that a woman can travel alone in a country, they will think the country is quite safe and suitable for investment—implying that the converse is also true. The 2025 revision of the National Tourism Policy moves toward regulating tour operators and online travel agencies, and there are proposals for female-staffed floors and verified-safe listings for women travellers, but these remain nascent responses to a deep structural problem.
+      </p>
+
+      <h2>Conclusion: The Cost of Patriarchy</h2>
+      <p>
+        The combination of patriarchy as a structural system, rape as its most violent expression, and harassment as its quotidian enforcement mechanism has produced in Bangladesh a society in which women's freedom of movement is fundamentally compromised. The consequences are not confined to individual women; they ripple outward to families, communities, and the national economy. A country that cannot ensure that a child is safe walking to school, that a woman can travel to work without being molested, or that a family can visit a beach without fear of sexual assault is a country that is failing at the most basic level of governance.
+      </p>
+
+      <p>
+        The data presented here—the 52.3% surge in documented rape cases, the 3% conviction rate, the 84% prevalence of sexual harassment, the 60% of women prevented from going out alone, the international travel advisories warning women against solo travel—are not discrete problems requiring discrete solutions. They are interconnected symptoms of a patriarchal order that assigns women subordinate status and then punishes them for venturing beyond it. Until that order is dismantled—through legal reform that prioritises survivor justice over perpetrator impunity, through the enforcement of existing laws, through the expansion and resourcing of specialised tribunals, through comprehensive sexuality education that challenges misogynistic norms, and through a sustained national campaign against sexual violence—the retreat of women and families from public space will continue.
+      </p>
+
+      <p>
+        The challenge is immense, but the path forward is clear. As Kamrun Nahar has argued, there is a need for "a serious and effective national campaign against misogyny and violence against women to create awareness," with measures to protect women and children outlined in the government's work plan. The question is not whether Bangladesh can afford such a campaign, but whether it can afford not to. Every woman who retreats from public life, every family that cancels a trip, every tourist who chooses a different destination represents not only a loss of freedom but a loss of the social and economic vitality that depends on the full participation of half the population. Patriarchy, in this sense, is not only a curse for women; it is a curse for the nation as a whole.
+      </p>
+    </div>
+  );
+};
+
+
+// --- src/components/ArticlePostPeriod.tsx ---
+
+
+const ArticlePostPeriod: React.FC = () => {
+  return (
+    <div className="editorial-prose">
+      <p>So here's the question worth sitting with for a second: how does something this universal end up this unspoken?</p>
+      
+      <p>
+        This isn't a "women's issue" tucked away in a corner of health class. It's a subject that touches every household — because every man alive was born from a woman who menstruated, was likely raised alongside a sister, mother, wife, daughter, or friend who does, and will, at some point, be standing in a room where someone he loves is in pain, embarrassed, or simply needs a pack of pads bought without twenty questions attached. And yet, in classrooms across Bangladesh and much of South Asia, the chapter on menstruation is the one page teachers turn past a little too quickly, textbooks mention a little too vaguely, and coaching centers skip entirely because — let's be honest — it was never going to be on the exam.
+      </p>
+      
+      <p>
+        This blog is an attempt to say the word out loud. Repeatedly. Unapologetically. Because silence has a cost, and it's not the men in the family who are paying it.
+      </p>
+
+      <h2>The Question Nobody Asks Out Loud</h2>
+      <p>
+        Ask most adult men in Bangladesh to explain what actually happens during a menstrual cycle, and you'll get a shrug, a nervous laugh, or a vague reference to "that time of the month." Ask them why their sister, wife, or daughter sometimes doubles over in pain, avoids the kitchen, or goes quiet for a few days, and the answer is often silence dressed up as respect — as if not knowing is somehow more polite than knowing and caring.
+      </p>
+      
+      <p>
+        That silence isn't accidental. It's inherited. It's been passed down the way old furniture is passed down — nobody remembers why it's shaped that way, but nobody rearranges it either.
+      </p>
+
+      <h2>"Shorom-Lojja": The Shame We Inherited, Not Chose</h2>
+      <p>
+        Bangladeshi researchers studying menstrual health in rural schools have a term for this deeply held cultural instinct toward silence and modesty: <em>shorom-lojja</em> — a culturally enforced norm of shame and restraint that governs what can and cannot be said, especially about the body, especially by or in front of women. It's not written into any law. It doesn't need to be. It lives in the way mothers whisper instructions to daughters, in the way a stained cloth is hidden rather than washed openly, in the way a girl learns to apologize with her body language before she's even done anything wrong.
+      </p>
+      
+      <p>
+        Researchers studying rural communities across Bangladesh and South Asia have documented an entire ecosystem of restrictions that follow a menstruating woman or girl: she may be kept from entering the kitchen, discouraged from going outside, restricted from bathing normally, or even avoided physically by others in the household — practices rooted in old beliefs that treat menstruation less like biology and more like a contagion or a curse. None of these restrictions have any grounding in medicine. All of them have staying power because nobody — least of all the men in the house — was ever taught to question them.
+      </p>
+
+      <h2>The Textbook Chapter That Exists on Paper Only</h2>
+      <p>
+        Here's where it gets almost absurd: menstruation is technically in the curriculum. Governments have written it into national frameworks. Biology books have a page for it. And yet, study after study on Bangladeshi classrooms finds the same pattern — the subject is "biologically recognized but socially censored." It exists on paper. It rarely survives contact with an actual classroom.
+      </p>
+      
+      <p>A few things researchers have consistently found:</p>
+      <ul>
+        <li>In a nationally cited survey, only around 6 percent of schools in Bangladesh were found to provide any real health and hygiene education at all — the topic exists in policy far more than it exists in practice.</li>
+        <li>A study analyzing anonymous questions submitted by Bangladeshi schoolchildren found that current textbooks largely exclude the practical, real-life side of menstruation — how to actually manage it, what's normal, what to do when it starts unexpectedly — leaving students to fill the gaps with rumor, fear, or silence.</li>
+        <li>Teachers themselves openly admit the problem. In interviews and pilot studies across Bangladeshi schools, teachers have described feeling embarrassed, underprepared, and unsupported when it comes to teaching puberty and menstruation — some unsure how to even respond to common myths, like the belief that a menstruating girl shouldn't cook.</li>
+        <li>One research team studying Bangladeshi teachers went as far as recommending that menstrual and puberty education be tied directly to national examinations — on the theory that if it isn't tested, it simply won't be taught with any seriousness. In an education culture built around exams and coaching centers, a chapter with no marks attached is a chapter with no urgency attached.</li>
+      </ul>
+      
+      <p>
+        That last point deserves its own sentence: in a system where coaching centers exist to drill students on exactly what will be asked and nothing else, an untested chapter is functionally an invisible chapter. It's not that the information doesn't exist. It's that the entire architecture of exam-driven education has quietly decided it doesn't matter enough to teach properly — in school, in college, or in the coaching classes that shape so much of a student's real education in this region.
+      </p>
+
+      <h2>The Numbers Behind the Whisper</h2>
+      <p>Statistics rarely capture lived experience, but they're useful for showing just how widespread this "personal" problem actually is.</p>
+      <ul>
+        <li><strong>Only about 32 percent</strong> of girls in Bangladesh knew what menstruation was before it happened to them for the first time, according to UNICEF-cited national data — meaning roughly two out of three girls experience their first period with little to no idea what's happening to their own body.</li>
+        <li>Of those caught off guard, <strong>69 percent</strong> said they felt scared the first time it happened — not curious, not neutral, but frightened, in a moment that should have been met with information and reassurance instead.</li>
+        <li><strong>Nearly one in three girls</strong> in Bangladesh miss around two and a half days of school every month because of their periods — a monthly, recurring loss of education driven not by illness, but by stigma and a lack of safe, private facilities.</li>
+        <li><strong>More than half of women</strong> in Bangladesh — and more than two-thirds of women in neighboring Nepal — report that they don't participate in ordinary daily activities while menstruating, whether that's cooking, socializing, praying, or simply moving freely through their own home.</li>
+        <li>Globally, an estimated <strong>500 million people</strong> lack adequate access to menstrual products and the facilities needed to manage their periods safely and with dignity — and South Asia carries a heavy share of that number.</li>
+      </ul>
+      <p>These aren't abstract figures. Each percentage point is a girl sitting out of class, a woman quietly excusing herself from a family gathering, a wife enduring pain nobody in the house has been taught to notice.</p>
+
+      <h2>What Silence Actually Costs</h2>
+      <p>The consequences of this silence aren't limited to embarrassment. They compound.</p>
+      
+      <p><strong>Lost education.</strong> Missing multiple days of school every month, semester after semester, year after year, adds up to a real, measurable education gap — one that disproportionately affects girls' futures, confidence, and independence.</p>
+      
+      <p><strong>Health risks.</strong> Without accurate information or affordable products, many women and girls in Bangladesh — especially in flood-affected and rural areas — resort to using old cloth, rags, or newspaper during their periods. Improperly washed or dried materials, often hidden out of shame rather than dried openly in the sun, have been linked to urinary and reproductive infections. During floods and emergencies, the problem intensifies sharply, as sanitation facilities disappear entirely.</p>
+      
+      <p><strong>A supply chain built on shame, not logistics.</strong> One story shared by UNICEF Bangladesh captures this perfectly: because most shopkeepers selling sanitary products are men, a girl who needs pads often cannot buy them herself. She tells her mother. Her mother tells the father. The father buys the pads and hands them back to the mother, who finally gives them to the daughter. If any one link in that chain forgets, hesitates, or is unavailable — the girl simply goes without. A basic hygiene product, gated behind three layers of second-hand embarrassment, entirely because one man in a shop and one man in the house were never taught that this is just... a purchase.</p>
+      
+      <p><strong>Emotional weight.</strong> Fear, shame, and isolation during a recurring, unavoidable biological process take a quiet mental toll — one rarely acknowledged because acknowledging it would require talking about the thing itself.</p>
+
+      <h2>"Not a Girls' Issue": The Case for Every Man in the Room</h2>
+      <p>This is usually where these conversations get filed away — as something for mothers to explain to daughters, women to discuss among themselves, "not really a men's topic." But that framing is exactly the problem, and it falls apart the moment you look at who's actually in the room when it matters.</p>
+      
+      <h3>For the Brother</h3>
+      <p>A sister's first period often arrives with fear before it arrives with understanding — remember, roughly 7 in 10 Bangladeshi girls describe feeling scared, not informed. A brother who understands what's happening isn't a bystander to that fear; he's often the one who can normalize it with a shrug instead of a smirk, who can hand over money for pads without turning it into a whispered family drama, who doesn't make a sister feel like she's done something wrong by simply existing in her own body that week.</p>
+      
+      <h3>For the Dad Raising a Daughter (or a Son)</h3>
+      <p>A father who understands menstruation can be the difference between a daughter who feels prepared and one who feels ambushed by her own body. He can be the one who makes sure pads are always in the house before they're urgently needed, who doesn't flinch or delegate the topic entirely to "her mother's job," who models — for a son watching, too — that this is a normal biological fact, not a shameful secret to be managed around.</p>
+      
+      <h3>For the Son Who Grew Up Watching His Mother Hide</h3>
+      <p>Many men grew up watching their mothers manage periods in total secrecy — hiding cloth, whispering explanations, absorbing pain quietly so as not to "bother" anyone. A son who understands what his mother actually goes through, and why she sometimes needs rest, quiet, or simply less to carry that week, can offer something rare: care without being asked, because he finally understands what he's caring about.</p>
+      
+      <h3>For the Husband</h3>
+      <p>A husband who understands the menstrual cycle isn't just being thoughtful — he's building a marriage on actual understanding rather than tolerated mystery. Recognizing period pain as real physical pain (not moodiness to be managed around), knowing when rest is needed rather than resented, and being able to simply pick up pads at the store without ceremony all quietly signal something bigger: that his wife's body isn't a topic too awkward for him to know about.</p>
+      
+      <h3>For the Boyfriend and the Friend</h3>
+      <p>Outside of family, this matters just as much. A boyfriend or close friend who understands periods can be the difference between a partner who feels safe mentioning she's in pain, and one who learns to hide it because past reactions taught her it wasn't worth mentioning. Small things — not treating the topic as disgusting, not joking about it at someone's expense, offering a hot water bottle or simply asking "do you need anything?" — build the kind of trust that most South Asian relationships are never explicitly taught to build around this subject.</p>
+      
+      <p>None of this requires a medical degree. It requires basic, accurate knowledge and the willingness to treat a normal bodily process as exactly that — normal.</p>
+
+      <h2>What Changing the Story Actually Looks Like</h2>
+      <p>The good news is that this isn't being ignored everywhere. In 2021, UNICEF worked with the Government of Bangladesh to develop a National Menstrual Hygiene Management Strategy, explicitly designed to weave menstrual education into school lessons for both girls and boys — not as a separate, hidden lesson for one gender, but as shared, ordinary knowledge. Efforts are underway to build private, hygienic school facilities, install sanitary pad vending machines in health centers, and train teachers to handle the subject with less discomfort and more confidence.</p>
+      
+      <p>Public health researchers have also pushed for a very specific, very practical fix: tie menstrual and puberty education to the exam system itself. If a subject is tested, coaching centers teach it, teachers prepare for it, and students take it seriously — the same logic that currently keeps this chapter out of serious study could just as easily bring it in.</p>
+      
+      <p>But policy alone doesn't rewrite culture. That part happens at home, one conversation at a time — often started by the men willing to ask the "awkward" question instead of avoiding it.</p>
+
+      <h2>A Short, Honest To-Do List for the Men Reading This</h2>
+      <ul>
+        <li><strong>Learn the basics.</strong> You don't need a textbook — a five-minute honest search on what a menstrual cycle actually is will put you ahead of most men in your position.</li>
+        <li><strong>Normalize the word.</strong> Say "period" instead of a euphemism whispered behind a hand. Language sets the tone for how seriously something is taken.</li>
+        <li><strong>Keep supplies stocked, no announcement needed.</strong> If there's a woman in your household, having pads available before they're urgently needed removes one small daily source of stress.</li>
+        <li><strong>Buy them yourself, without ceremony.</strong> Walking up to a counter and buying sanitary pads is not embarrassing. Treat it exactly as ordinary as buying soap — because it is.</li>
+        <li><strong>Don't dismiss the pain.</strong> Period pain can be genuinely severe. "You're fine" is rarely the right response; "do you need rest, heat, or medicine?" usually is.</li>
+        <li><strong>Correct the myths when you hear them.</strong> If someone repeats an old belief about menstruating women being "unclean" or unable to cook, that's a small, low-stakes moment to gently push back.</li>
+        <li><strong>Ask, don't assume.</strong> Every woman's experience with her cycle is different. A little curiosity, expressed respectfully, goes further than silence ever will.</li>
+        <li><strong>Talk to the next generation.</strong> If you're raising a son, teach him this early. If you're raising a daughter, make sure fear isn't her first teacher.</li>
+      </ul>
+
+      <h2>The Last Word</h2>
+      <p>There is nothing shameful about a biological process that every single human being on this planet exists because of. What's genuinely embarrassing is a curriculum that skips it, a coaching culture that ignores it because it isn't graded, and generations of men who were never given the chance to simply know — and so learned to look away instead.</p>
+      
+      <p>Breaking a silence this old doesn't require a grand gesture. It requires brothers who don't flinch, fathers who prepare instead of avoid, sons who understand what their mothers carried quietly, husbands who show up with more than tolerance, and friends who make space instead of jokes.</p>
+      
+      <p>Half the population bleeds. It's long past time the other half stopped pretending not to notice.</p>
+
+      <p className="text-sm italic mt-8 pt-4 border-t border-[var(--glass-border)] opacity-80">
+        Sources referenced: UNICEF (2021–2022 Bangladesh Menstrual Hygiene Management data and Fact Sheet on Menstrual Health and Hygiene), the World Bank (2017 survey on school health and hygiene education in Bangladesh), Global Health Action (2021, teachers' perspectives on menstrual hygiene and puberty education in Bangladeshi schools), Public Health Challenges / Wiley (2026, study on cultural silence and menstrual hygiene management in rural Bangladeshi schools), and peer-reviewed research on menstrual hygiene management in flood-affected and rural Bangladesh.
+      </p>
+    </div>
+  );
+};
+
+
+// --- src/components/ArticlePostTabs.tsx ---
+
+
+const ArticlePostTabs: React.FC = () => {
+  return (
+    <div className="editorial-prose">
+      <h2>What was actually announced</h2>
+      <p>
+        On September 1, 2026, Education Minister ANM Ehsanul Haque Milon told a University Day audience at Khulna University of Engineering & Technology that the government would give tablets to the roughly 116,000 students who scored GPA-5 in this year's SSC and equivalent exams, framing it as recognition for meritorious students and a push toward tech-enabled learning. Within hours, on his verified Facebook page the same night, the minister revised the plan: laptops, not tablets, and only for students who hit a "Golden GPA-5" — at least 80 marks in every single subject — a narrower group whose exact size the education boards haven't disclosed.
+      </p>
+
+      <p>
+        That reversal, inside a single evening, is worth sitting with. It means the device, the eligibility bar, the recipient count, the brand, the specifications, the procurement method and the budget were all still unsettled at the moment the announcement made headlines. Nothing about a tender, a supplier, or a per-unit cost has been made public as of this writing.
+      </p>
+
+      <p>
+        This year's SSC results also came in weaker than usual: the pass rate fell to 62.25% from roughly 68% the year before, and GPA-5 holders dropped from 139,032 in 2025 to 116,676 in 2026, per Business Standard's coverage of the results. Some context worth keeping in view as the country debates spending public money on a hardware giveaway.
+      </p>
+
+      <h2>Bangladesh has run this experiment before — and it didn't go well</h2>
+      <p>
+        The most direct precedent isn't a giveaway to SSC toppers specifically — no earlier scheme of that exact shape appears to be on record — but Bangladesh's broader history of state-driven, budget device programs offers a clear warning.
+      </p>
+
+      <p>
+        The Doel laptop project, launched by Telephone Shilpa Sangstha (TSS) in 2011, was the government's flagship attempt to build an affordable, locally assembled computer and get it into schools, post offices, and the army. It collapsed. Academic case studies of the project found that its two main technical/investment partners abandoned the venture within about a year of launch, that by 2013 barely two-thirds of the laptops assembled had actually been sold, and that a large share of the buyers were the Ministry of Education itself. A university-published market study found that 83% of users who responded to surveys reported battery problems, alongside recurring complaints about Wi-Fi, webcams, RAM and screen resolution. The Daily Star later reported that the education ministry, the postal department and the army — the project's three big institutional buyers — all lodged complaints about build quality. Manufacturing was effectively wound down by 2016, and in 2026 the state minister for ICT was still on record asking for an inquiry into who should be held accountable for the project's failure, according to Bangla tech outlet Jagonews24.
+      </p>
+
+      <p>
+        Separately, the government has repeatedly turned to domestic manufacturer Walton for large device procurements — 25,125 laptops for an ICT Division project, and a roughly Tk447 crore contract for 395,000 tablets for the 2021 digital census, among others. These were competitively tendered public purchases rather than free giveaways to students, and there's no comparable independent quality audit of them on the public record the way there is for Doel. But they establish that "buy Bangladeshi, buy cheap, buy at scale for a state program" is a familiar procurement instinct here — one that hasn't always been paired with a public accounting of how the devices performed once delivered.
+      </p>
+
+      <p>
+        None of this means the 2026 device giveaway is destined to repeat Doel's fate. It means the country has direct, documented experience with exactly this failure mode, and that experience is the reasonable baseline against which to judge a new, still-unspecified program.
+      </p>
+
+      <h2>The part nobody's talking yet: what happens to these devices in three years</h2>
+      <p>
+        This is where the "e-waste" question stops being rhetorical. Bangladesh already has a serious, well-documented e-waste problem, and the enforcement mechanism meant to manage it is widely reported as barely functioning.
+      </p>
+
+      <p>A few figures worth knowing, drawn from recent research and a 2026 field assessment:</p>
+      <ul>
+        <li>Bangladesh generates an estimated 3 million tonnes of e-waste annually, and academic reviews describe the sector as growing roughly 20% a year.</li>
+        <li>Less than 10% of that e-waste is formally recycled, according to a 2026 assessment by the digital-rights group VOICE (Voices for Interactive Choice and Empowerment), conducted with the Association for Progressive Communications.</li>
+        <li>The same VOICE assessment found that of 15 surveyed entities, none were actually collecting end-of-life products as required.</li>
+        <li>Bangladesh loses an estimated US$200–221 million a year in recoverable material value — gold, copper, and other components — because so little e-waste is properly processed, per that report.</li>
+        <li>The country does have a legal framework: the Hazardous Waste (E-Waste) Management Rules, 2021, issued under the Bangladesh Environmental Protection Act, 1995, which sets escalating collection targets for manufacturers and importers and carries penalties of up to two years' imprisonment or a Tk200,000 fine for violations. But researchers reviewing its rollout have consistently found a wide gap between what the rules require on paper and what happens on the ground.</li>
+      </ul>
+
+      <p>
+        Put those two facts side by side. A government that already has trouble getting the industry to take back and safely process ordinary consumer electronics is about to inject well over 100,000 new devices — tablets or laptops, whichever it settles on — into households across the country, with no public statement yet about warranty length, repair support, or what happens to the unit once it dies. A cheaply sourced device with a two- or three-year real-world lifespan, multiplied across six-figure recipient numbers, is not a hypothetical addition to that waste stream — it's an entirely foreseeable one, and foreseeable is exactly the point at which planning is supposed to happen, not after the fact.
+      </p>
+
+      <h2>Will the hardware actually be usable — or a repeat of the spec sheet that sank Doel?</h2>
+      <p>
+        There's a second, more basic question sitting underneath all the procurement and e-waste concerns above: even if a device does ship on time, will it be fast enough to actually be worth using?
+      </p>
+
+      <p>
+        This isn't a hypothetical worry. Doel's own published spec sheets from 2011 are on record, and they're instructive. The entry "Primary" model — the one the education ministry itself bought in bulk — ran on a VIA 8650 processor clocked at 800MHz, paired with just 512MB of RAM and 16GB of flash storage in place of a hard drive. The step-up "Basic" model wasn't much better: an Intel Atom N455 at 1.66GHz, 1GB of RAM, and a 250GB HDD. Atom-class netbook chips like these were built for basic web browsing at launch and were already considered sluggish for everyday multitasking within a couple of years — a machine like that trying to run a modern browser with a dozen tabs, a video call, and a word processor open at once today would grind to a crawl. That's the real-world version of the "unusable, painful to use" scenario worth naming plainly: a free laptop that's too slow to actually do coursework, research, or exam prep on is not meaningfully different from no laptop at all — arguably worse, since it creates the appearance that the digital-divide problem has been solved when it hasn't.
+      </p>
+
+      <p>
+        So what does "usable" actually mean by 2026 standards, and how does that compare to a low-spec device like Core 2 Duo-class processors, 4GB of RAM, and mechanical hard drives — the tier this kind of budget program has tended to land on historically?
+      </p>
+
+      <ul>
+        <li><strong>Processor:</strong> Old dual-core chips from the Core 2 Duo era are more than a decade and a half old, lack modern power-efficiency and security features, and are no longer considered adequate for a current OS plus a browser doing real work. Even an entry-level 2026 laptop is expected to ship with a current-generation quad-core-or-better mobile chip.</li>
+        <li><strong>RAM:</strong> Microsoft's official floor for Windows 11 is 4GB, but hardware guides and Microsoft's own engineers describe that as barely enough to boot, with 8GB as the practical minimum for smooth everyday use and 16GB increasingly treated as the sensible baseline for a machine expected to last several years, per HP's 2026 buying guidance and independent hardware coverage. A 4GB machine handed to a student today would struggle from day one, not just after a few years of wear.</li>
+        <li><strong>Storage:</strong> A mechanical hard drive — 512GB or otherwise — is now considered the single biggest bottleneck in an otherwise decent machine; SSD storage is the baseline expectation on any laptop sold as new in 2026, because it affects boot time, app responsiveness and overall feel far more than capacity does.</li>
+      </ul>
+
+      <p>
+        None of this requires an expensive machine. Genuinely usable, SSD-based, 8GB-RAM laptops exist at prices well within the range Doel itself charged for its worst-performing models in 2011 taka-adjusted terms. The risk isn't that a decent laptop is unaffordable — it's that "cheap" and "outdated" quietly get treated as the same purchasing decision, the way they were with Doel's bottom-tier models. That's exactly why the specifications need to be published before delivery, not discovered by students unboxing their prize: a processor and RAM figure on a tender document is a two-line disclosure, and it's the single fastest way to tell whether this program is a genuine tool or a repeat of a machine nobody could actually use.
+      </p>
+
+      <h2>The fair case for the program</h2>
+      <p>
+        It's worth stating plainly: the underlying idea isn't unreasonable, and dismissing it outright would be its own kind of unfairness. Rewarding academic merit is a normal thing for an education system to do, and putting a computer in the hands of a strong student from a low-income household can be a genuine, life-changing form of access — to research, to university applications, to the "AI era" skills the government has been publicly emphasizing since Prime Minister Tarique Rahman's inaugural address in February. A tablet or laptop is also a more modern, arguably more useful prize than the medals, certificates or cash stipends such programs have traditionally used. None of the concerns above are an argument against helping meritorious students. They're an argument for doing it with a plan.
+      </p>
+
+      <h2>What "doing it with a plan" would actually require</h2>
+      <p>
+        Before public money is committed, there's a fairly short list of things a transparent version of this program would need to disclose — and that journalists, opposition lawmakers, and civil-society watchdogs like Transparency International Bangladesh would be well within their normal, legitimate role to keep asking about:
+      </p>
+
+      <ul>
+        <li>Procurement method — open competitive tender or single-source purchase, and from which supplier(s)</li>
+        <li>Published technical specifications — not just "tablet" or "laptop," but the processor, RAM, storage type (SSD vs HDD) and build-quality standard being paid for, benchmarked against what a 2026 machine needs to actually run smoothly rather than merely boot</li>
+        <li>Total budget and per-unit cost, so the public can judge value for money against comparable commercial devices</li>
+        <li>Warranty and after-sales support terms, including who repairs a broken unit and for how long</li>
+        <li>A stated device lifespan and a genuine end-of-life plan — ideally a manufacturer or government take-back commitment consistent with the 2021 e-waste rules, not a vague aspiration</li>
+        <li>An independent quality audit at delivery, given that the last comparable domestic hardware push required a still-unresolved government inquiry into what went wrong</li>
+      </ul>
+
+      <h2>The bottom line</h2>
+      <p>
+        Bangladesh doesn't have to choose between rewarding its top students and avoiding another Doel. The choice the government actually faces is narrower and more boring: publish the specifications, publish the cost, and say — before the devices ship — what happens to them when they stop working. That's not a high bar, and it's also not one the country has consistently cleared before. Given that history, expecting the details up front isn't cynicism about this specific announcement. It's the ordinary due diligence a taxpayer-funded program of this size should get regardless of which party is in office.
+      </p>
+
+      <p className="text-sm italic mt-8 pt-4 border-t border-[var(--glass-border)] opacity-80">
+        Sources: The Business Standard, Jagonews24, The Daily Star, an IEOM Society-published study and an Academia.edu-hosted paper on the Doel laptop project, archived Doel spec sheets from 2011 (StarTech.com.bd, Hasibul.info, and contemporaneous Bangladeshi tech blogs), ScienceDirect reviews of Bangladesh's e-waste policy, a 2026 VOICE/Association for Progressive Communications assessment reported by IndexBox, and 2026 hardware-standard guidance from HP and independent Windows 11 hardware coverage. This piece reflects publicly reported facts available as of September 3, 2026; procurement details for the SSC 2026 device program had not been published at time of writing and may change.
+      </p>
+    </div>
+  );
+};
+
+
+// --- src/components/ArticlePostCollapse.tsx ---
+
+
+const ArticlePostCollapse: React.FC = () => {
+  return (
+    <div className="editorial-prose">
+      <p>
+        For decades, we have comforted ourselves with a comforting illusion: that a rising pass rate and an explosion of GPA-5 achievements in our public examinations meant our youth were marching toward a brighter, more competitive future. That illusion has shattered.
+      </p>
+
+      <p>
+        The publication of the 2025 Higher Secondary Certificate (HSC) and equivalent exam results sent shockwaves across Bangladesh. It wasn't just a poor showing; it was an absolute debacle—the lowest pass rate in 21 years. Over half a million young minds walked away from this crucial milestone having failed, leaving families despondent, educators scrambling, and the entire nation facing an uncomfortable truth: our education system is in a state of quiet, systemic collapse.
+      </p>
+
+      <h2>The Anatomy of a Debacle: 2025 by the Numbers</h2>
+      <p>
+        To understand how deep this wound runs, we have to look past the political rhetoric and examine the stark data of the latest results. The drop-off from previous years isn't just a minor statistical fluctuation—it is a vertical cliff.
+      </p>
+
+      <div className="overflow-x-auto my-10 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] shadow-[var(--glass-shadow)]">
+        <table className="w-full border-collapse min-w-[620px] text-sm md:text-base">
+          <thead>
+            <tr className="border-b border-[var(--glass-border)] bg-black/5 dark:bg-white/5">
+              <th className="p-4 text-left font-semibold text-[var(--text-main)]">Metric</th>
+              <th className="p-4 text-center font-semibold text-[var(--text-main)]">2024 / Previous Years</th>
+              <th className="p-4 text-center font-semibold text-[var(--text-main)]">2025 Results</th>
+              <th className="p-4 text-left font-semibold text-[var(--text-main)]">The Reality Shift</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--glass-border)]">
+            <tr>
+              <td className="p-4 font-semibold text-[var(--text-main)]">National Pass Rate</td>
+              <td className="p-4 text-center">~75% - 80% (varies)</td>
+              <td className="p-4 text-center font-bold text-red-500">58.83%</td>
+              <td className="p-4">Lowest in 21 years; nearly 43% of candidates failed.</td>
+            </tr>
+            <tr>
+              <td className="p-4 font-semibold text-[var(--text-main)]">GPA-5 Achievers</td>
+              <td className="p-4 text-center">~131,376 (2024 general)</td>
+              <td className="p-4 text-center font-bold text-red-500">63,219</td>
+              <td className="p-4">A reduction of over 77,000 top-tier scores.</td>
+            </tr>
+            <tr>
+              <td className="p-4 font-semibold text-[var(--text-main)]">100% Pass Institutions</td>
+              <td className="p-4 text-center">1,388</td>
+              <td className="p-4 text-center font-bold text-red-500">345</td>
+              <td className="p-4">A massive drop in high-performing colleges.</td>
+            </tr>
+            <tr>
+              <td className="p-4 font-semibold text-[var(--text-main)]">Zero Pass Institutions</td>
+              <td className="p-4 text-center">65</td>
+              <td className="p-4 text-center font-bold text-red-500">202</td>
+              <td className="p-4">More than triple the number of schools where not a single student passed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <blockquote>
+        <p>"This is the worst result in 21 years. It is frightening for our future. We need to discuss why this is happening."</p>
+        <footer>— Sr. Shikha Laetitia Gomes, Principal of Holy Cross College</footer>
+      </blockquote>
+
+      <h2>Why Did the System Fail the Class of 2025?</h2>
+      <p>
+        This catastrophic drop didn't happen in a vacuum. It is the cumulative fallout of years of policy instability, natural disasters, and structural failures that the system simply refused to adapt to.
+      </p>
+
+      <h3>1. The English and ICT "Gatekeeper" Trap</h3>
+      <p>
+        An analysis of the failures reveals that the massive drop-off was heavily driven by disastrous performances in two core subjects: English and Information and Communication Technology (ICT).
+      </p>
+      <p>
+        For years, the curriculum has forced students to memorize grammar structures and outdated ICT definitions rather than teaching them how to write practically or understand technology. When examiners stopped using highly predictable questions or evaluation standards shifted slightly closer to actual merit, the fragile deck of cards collapsed. Students who could comfortably memorize a guide-book paragraph were left entirely unable to write an original sentence.
+      </p>
+
+      <h3>2. The Unaddressed COVID-19 Hangover</h3>
+      <p>
+        We love to pretend that the pandemic is ancient history, but for the 18-to-20-year-olds taking the HSC today, it was the defining disruption of their educational foundation.
+      </p>
+      <p>
+        During crucial early-development years, these students lost nearly two years of classroom continuity. Online classes were a luxury enjoyed by a tiny, urban elite; the rest of the country received practically no real learning. The "learning gap" was never repaired. Instead of implementing robust remedial learning programs, the state simply pushed these students through the system, expecting them to magically sit for standard, rigorous board exams.
+      </p>
+
+      <h3>3. Absolute Chaos and Exam Disruptions</h3>
+      <p>
+        The academic life of an HSC candidate in Bangladesh over the last year has been defined by anxiety. From severe natural disasters—such as the massive monsoon floods that forced the sudden suspension of exams in Chattogram—to political instability, the environment has been anything but conducive to academic focus.
+      </p>
+      <p>
+        Students have had to march through knee-deep water to reach exam halls, wait out delayed schedules, and deal with intense social stress. The psychological toll of preparing under such volatile conditions is immeasurable, directly resulting in cognitive exhaustion and exam-room failures.
+      </p>
+
+      <h2>The Deeper, Structural Rot</h2>
+      <p>
+        To blame the HSC debacle solely on "one bad year" or "tough questions" is a cop-out. The HSC results are merely a symptom; the disease is the systematic decay of the entire Bangladeshi educational framework.
+      </p>
+
+      <h3>The Tyranny of Rote Learning and the "Coaching Class" Complex</h3>
+      <p>
+        We have created an education system that values certificates over competence, and grades over actual learning. From primary school to college, students are trained to be mimicry machines.
+      </p>
+      
+      <p>
+        <strong>The Cycle:</strong> Wake up at 6:00 AM → attend college (where little actual teaching happens) → run to private tutors → spend evenings at coaching centers → memorize guidebooks late into the night.
+      </p>
+      
+      <p>
+        <strong>The Result:</strong> The moment these "GPA-5" students step into a university exam hall, the illusion fades. Up to 91.5% of students fail university admission tests despite high secondary GPAs. When they enter the workforce, employers complain that university graduates cannot write a basic corporate email or structure a simple analytical report.
+      </p>
+
+      <h3>The Grand Urban-Rural Chasm</h3>
+      <p>
+        If you reside in a posh neighborhood in Dhaka, you have access to high-speed internet, experienced teachers, and air-conditioned coaching centers. If you are a student in rural Feni, Noakhali, or Barishal, you are likely studying in a school that suffers from daily power outages, lacks basic internet facilities, and has a severe shortage of trained subject teachers.
+      </p>
+      <p>
+        Yet, the government tests both students on the exact same exam script. The "lowest pass rate in 21 years" is heavily weighted by the absolute abandonment of rural schools, where pass rates in some colleges hit an absolute zero.
+      </p>
+
+      <h3>Severe Financial Starvation</h3>
+      <p>
+        While UNESCO recommends that developing nations allocate 4% to 6% of their GDP to education, Bangladesh routinely allocates a meager 1.8%. Worse, due to budget cuts and bureaucratic implementation failures, the actual expenditure often drops to a humiliating 1.3%.
+      </p>
+      <p>
+        To make matters worse, 80% to 90% of this budget goes directly to administrative salaries. There is practically nothing left over to modernize classrooms, purchase technology, build digital infrastructure, or offer competitive salaries to attract brilliant, qualified minds into the teaching profession.
+      </p>
+
+      <h2>How to Save Our Future: A Plan for Radical Reform</h2>
+      <p>
+        If we do not act immediately, we will produce a generation of degree-holders who are functionally unemployed, unable to compete in an AI-driven global economy. Saving our education system requires moving past cosmetic band-aids. We need structural surgery:
+      </p>
+
+      <h3>1. Ban Guidebooks and Dismantle the Coaching Industry</h3>
+      <p>
+        We must completely outlaw the commercial publication of exam-shortcut guidebooks. Textbooks must be redesigned to be interactive, comprehensive, and connected to real-life applications. Classrooms must become the primary source of education again, breaking the economic stranglehold that predatory coaching centers have on middle-class families.
+      </p>
+
+      <h3>2. Shift Focus from Final Exams to Continuous Assessment</h3>
+      <p>
+        Relying on a single, high-stakes 3-hour exam to determine a student’s entire life path is archaic and cruel. We must transition to a continuous assessment model. Projects, presentations, critical writing, and consistent class performance should carry equal weight, teaching students how to think rather than what to memorize.
+      </p>
+
+      <h3>3. Elevate the Teacher’s Status and Training</h3>
+      <p>
+        A curriculum is only as good as the person delivering it. We must depoliticize school management committees and establish an independent, permanent Education Commission. Teachers must receive rigorous, continuous training. Most importantly, teaching must be made a financially rewarding career path to attract top-tier university graduates.
+      </p>
+
+      <h3>4. Realignment of the Academic Calendar</h3>
+      <p>
+        Our current academic schedule is plagued by wasted "dead time" caused by administrative delays, overlapping exam sessions, and sudden political or climate disruptions. Restructuring the academic calendar to run on a tight, predictable schedule can reclaim up to a year of lost time for our youth, reducing national stress and boosting learning hours.
+      </p>
+
+      <h2>The Wake-Up Call We Needed</h2>
+      <p>
+        The disastrous HSC results are painful, but they are also a profound gift. They have stripped away the lies we told ourselves and exposed the structural decay before it is completely too late to fix.
+      </p>
+      <p>
+        Our youth have shown extraordinary resilience through pandemics, political upheavals, and natural crises. They deserve a state that matches their resilience with responsibility. It is time to step off the GPA-chasing treadmill, invest heavily in actual learning, and rebuild Bangladesh’s education system on a foundation of critical thinking, equity, and genuine competence.
+      </p>
+      
+      <p className="font-semibold text-[var(--text-main)] text-lg mt-6">
+        If we don't, our tomorrow will be a nation rich in certificates, but bankrupt in intellect.
+      </p>
+    </div>
+  );
+};
+
+
+// --- src/components/ContactForm.tsx ---
+
+
+
+const ContactForm: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+    botcheck: ''
+  });
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.botcheck) return; // honeypot
+    
+    setStatus('submitting');
+    setFeedbackMsg('');
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: '20c41191-09b3-4c3e-b1c5-ef157eb38720',
+          subject: 'New message from Alter Contact Form',
+          name: formData.name,
+          email: formData.email,
+          message: formData.message
+        })
+      });
+
+      const result = await response.json();
+      if (response.status === 200 || result.success) {
+        setStatus('success');
+        setFeedbackMsg('Thank you. Your message has been received.');
+        setFormData({ name: '', email: '', message: '', botcheck: '' });
+        setTimeout(() => {
+          setStatus('idle');
+          setFeedbackMsg('');
+        }, 5000);
+      } else {
+        setStatus('error');
+        setFeedbackMsg(result.message || 'Failed to submit. Please try again.');
+        setTimeout(() => setStatus('idle'), 4000);
+      }
+    } catch {
+      setStatus('error');
+      setFeedbackMsg('Network error. Please check your connection and try again.');
+      setTimeout(() => setStatus('idle'), 4000);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl mx-auto items-center w-full">
+      <input
+        type="checkbox"
+        name="botcheck"
+        className="hidden"
+        style={{ display: 'none' }}
+        checked={!!formData.botcheck}
+        onChange={e => setFormData(p => ({ ...p, botcheck: e.target.checked ? 'bot' : '' }))}
+      />
+
+      <div className="flex flex-col gap-2 w-full text-center">
+        <label htmlFor="contact-name" className="text-sm font-medium text-[var(--text-main)]">
+          Full Name
+        </label>
+        <input
+          id="contact-name"
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          placeholder="Jane Doe"
+          className="w-full p-4 rounded-2xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-main)] placeholder-[var(--text-light)] focus:bg-[var(--input-focus)] focus:border-[var(--input-focus-border)] focus:outline-none focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 transition-all text-center text-base"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 w-full text-center">
+        <label htmlFor="contact-email" className="text-sm font-medium text-[var(--text-main)]">
+          Email Address
+        </label>
+        <input
+          id="contact-email"
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          placeholder="jane@example.com"
+          className="w-full p-4 rounded-2xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-main)] placeholder-[var(--text-light)] focus:bg-[var(--input-focus)] focus:border-[var(--input-focus-border)] focus:outline-none focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 transition-all text-center text-base"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 w-full text-center">
+        <label htmlFor="contact-message" className="text-sm font-medium text-[var(--text-main)]">
+          Message
+        </label>
+        <textarea
+          id="contact-message"
+          name="message"
+          rows={5}
+          value={formData.message}
+          onChange={handleChange}
+          required
+          placeholder="How can we help you?"
+          className="w-full p-4 rounded-2xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-main)] placeholder-[var(--text-light)] focus:bg-[var(--input-focus)] focus:border-[var(--input-focus-border)] focus:outline-none focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 transition-all text-center text-base resize-y"
+        />
+      </div>
+
+      {feedbackMsg && (
+        <div
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium ${
+            status === 'success'
+              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30'
+          }`}
+        >
+          {status === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span>{feedbackMsg}</span>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={status === 'submitting'}
+        className={`inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full font-medium text-base transition-all duration-300 shadow-md ${
+          status === 'submitting'
+            ? 'opacity-70 cursor-not-allowed bg-[var(--btn-bg)] text-[var(--btn-text)]'
+            : status === 'success'
+            ? 'bg-emerald-600 text-white'
+            : 'bg-[var(--btn-bg)] text-[var(--btn-text)] hover:bg-[var(--btn-hover)] hover:-translate-y-0.5 hover:shadow-xl cursor-pointer'
+        }`}
+      >
+        {status === 'submitting' ? (
+          <>
+            <span>Sending...</span>
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </>
+        ) : status === 'success' ? (
+          <>
+            <span>Message Sent</span>
+            <CheckCircle2 className="w-5 h-5" />
+          </>
+        ) : (
+          <>
+            <span>Send Message</span>
+            <Send className="w-4 h-4" />
+          </>
+        )}
+      </button>
+    </form>
+  );
+};
+
+
+// --- src/components/BottomNav.tsx ---
+
+
+
+interface BottomNavProps {
+  currentView: string;
+  onSelectView: (view: string) => void;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
+
+const BottomNav: React.FC<BottomNavProps> = ({
+  currentView,
+  onSelectView,
+  theme,
+  onToggleTheme
+}) => {
+  const [opacity, setOpacity] = useState(1);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isHoveredRef = useRef(false);
+
+  useEffect(() => {
+    const resetIdleTimer = () => {
+      setOpacity(1);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+      idleTimerRef.current = setTimeout(() => {
+        if (!isHoveredRef.current) {
+          setOpacity(0.4);
+        }
+      }, 3500);
+    };
+
+    const events = ['mousemove', 'scroll', 'touchstart', 'click', 'keydown'];
+    events.forEach(event => window.addEventListener(event, resetIdleTimer, { passive: true }));
+    resetIdleTimer();
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      events.forEach(event => window.removeEventListener(event, resetIdleTimer));
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    isHoveredRef.current = true;
+    setOpacity(1);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    isHoveredRef.current = false;
+    idleTimerRef.current = setTimeout(() => {
+      setOpacity(0.4);
+    }, 3000);
+  };
+
+  // If viewing an article, highlight 'blogs' (Journal)
+  const isJournalActive = currentView === 'blogs' || currentView.startsWith('post-');
+
+  return (
+    <nav
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ opacity }}
+      className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-between sm:justify-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full z-40 transition-all duration-500 ease-out shadow-2xl glass-panel w-auto max-w-[92vw] sm:max-w-max border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl select-none"
+      aria-label="Main Navigation"
+    >
+      <button
+        onClick={() => onSelectView('home')}
+        className={`flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-3 sm:px-4 py-1.5 rounded-full transition-all duration-300 cursor-pointer min-h-[42px] touch-manipulation ${
+          currentView === 'home'
+            ? 'text-[var(--text-main)] bg-[var(--glass-active)] shadow-inner'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] active:scale-95'
+        }`}
+        aria-label="Home"
+      >
+        <Home className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+        <span className="text-[11px] font-semibold tracking-wide">Home</span>
+      </button>
+
+      <button
+        onClick={() => onSelectView('blogs')}
+        className={`flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-3 sm:px-4 py-1.5 rounded-full transition-all duration-300 cursor-pointer min-h-[42px] touch-manipulation ${
+          isJournalActive
+            ? 'text-[var(--text-main)] bg-[var(--glass-active)] shadow-inner'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] active:scale-95'
+        }`}
+        aria-label="Journal"
+      >
+        <BookOpen className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+        <span className="text-[11px] font-semibold tracking-wide">Journal</span>
+      </button>
+
+      <button
+        onClick={() => onSelectView('about')}
+        className={`flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-3 sm:px-4 py-1.5 rounded-full transition-all duration-300 cursor-pointer min-h-[42px] touch-manipulation ${
+          currentView === 'about'
+            ? 'text-[var(--text-main)] bg-[var(--glass-active)] shadow-inner'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] active:scale-95'
+        }`}
+        aria-label="About"
+      >
+        <User className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+        <span className="text-[11px] font-semibold tracking-wide">About</span>
+      </button>
+
+      <button
+        onClick={() => onSelectView('contact')}
+        className={`flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-3 sm:px-4 py-1.5 rounded-full transition-all duration-300 cursor-pointer min-h-[42px] touch-manipulation ${
+          currentView === 'contact'
+            ? 'text-[var(--text-main)] bg-[var(--glass-active)] shadow-inner'
+            : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] active:scale-95'
+        }`}
+        aria-label="Contact"
+      >
+        <Mail className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+        <span className="text-[11px] font-semibold tracking-wide">Contact</span>
+      </button>
+
+      <div className="w-[1px] h-6 bg-[var(--glass-border)] mx-1 shrink-0" />
+
+      <button
+        onClick={onToggleTheme}
+        className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-3 sm:px-3.5 py-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] active:scale-95 transition-all duration-300 cursor-pointer min-h-[42px] touch-manipulation"
+        aria-label="Toggle Theme"
+      >
+        {theme === 'dark' ? (
+          <Sun className="w-5 h-5 text-amber-300 transition-transform duration-300 group-hover:rotate-45" />
+        ) : (
+          <Moon className="w-5 h-5 transition-transform duration-300 group-hover:-rotate-12" />
+        )}
+        <span className="text-[11px] font-semibold tracking-wide">Theme</span>
+      </button>
+    </nav>
+  );
+};
+
+
+// --- src/components/ArticleView.tsx ---
+
+
+
+
+
+
+
+
+interface ArticleViewProps {
+  articleId: string;
+  onBack: () => void;
+  onNavigateArticle: (id: string) => void;
+}
+
+const ArticleView: React.FC<ArticleViewProps> = ({
+  articleId,
+  onBack,
+  onNavigateArticle
+}) => {
+  const [copied, setCopied] = useState(false);
+  const [fontSizeClass, setFontSizeClass] = useState<'text-base' | 'text-lg' | 'text-xl'>('text-base');
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const article = ARTICLES.find(a => a.id === articleId) || ARTICLES[0];
+  const currentIndex = ARTICLES.findIndex(a => a.id === article.id);
+  const nextArticle = currentIndex < ARTICLES.length - 1 ? ARTICLES[currentIndex + 1] : ARTICLES[0];
+  const prevArticle = currentIndex > 0 ? ARTICLES[currentIndex - 1] : null;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const progress = (window.scrollY / totalHeight) * 100;
+        setScrollProgress(Math.min(100, Math.max(0, progress)));
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [articleId]);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.subtitle,
+          url: window.location.href
+        });
+        return;
+      } catch {
+        // Fallback to clipboard
+      }
+    }
+    navigator.clipboard?.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const renderContent = () => {
+    switch (article.id) {
+      case 'post-movement':
+        return <ArticlePostMovement />;
+      case 'post-period':
+        return <ArticlePostPeriod />;
+      case 'post-tabs':
+        return <ArticlePostTabs />;
+      case 'post-collapse':
+        return <ArticlePostCollapse />;
+      default:
+        return <ArticlePostMovement />;
+    }
+  };
+
+  return (
+    <div className="w-full">
+      {/* Reading Progress Indicator */}
+      <div
+        className="fixed top-0 left-0 h-1 bg-[var(--text-main)] z-50 transition-all duration-150"
+        style={{ width: `${scrollProgress}%` }}
+        role="progressbar"
+        aria-valuenow={Math.round(scrollProgress)}
+      />
+
+      {/* Top Header Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[var(--text-main)] hover:bg-[var(--glass-hover)] transition-all shadow-sm cursor-pointer hover:-translate-x-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="font-medium text-sm">Back</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Font Size Adjusters */}
+          <div className="inline-flex items-center bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-full p-1 text-xs text-[var(--text-muted)]">
+            <button
+              onClick={() => setFontSizeClass('text-base')}
+              className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                fontSizeClass === 'text-base'
+                  ? 'bg-[var(--text-main)] text-[var(--bg-color)] font-semibold'
+                  : 'hover:text-[var(--text-main)]'
+              }`}
+              title="Standard font size"
+            >
+              A
+            </button>
+            <button
+              onClick={() => setFontSizeClass('text-lg')}
+              className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer text-sm ${
+                fontSizeClass === 'text-lg'
+                  ? 'bg-[var(--text-main)] text-[var(--bg-color)] font-semibold'
+                  : 'hover:text-[var(--text-main)]'
+              }`}
+              title="Larger font size"
+            >
+              A+
+            </button>
+            <button
+              onClick={() => setFontSizeClass('text-xl')}
+              className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer text-base font-bold ${
+                fontSizeClass === 'text-xl'
+                  ? 'bg-[var(--text-main)] text-[var(--bg-color)] font-semibold'
+                  : 'hover:text-[var(--text-main)]'
+              }`}
+              title="Largest font size"
+            >
+              A++
+            </button>
+          </div>
+
+          {/* Share Button */}
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[var(--text-main)] hover:bg-[var(--glass-hover)] transition-all text-xs font-medium cursor-pointer"
+            title="Share this essay"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-emerald-600 dark:text-emerald-400">Copied</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Title & Editorial Metadata */}
+      <header className="max-w-4xl mx-auto text-center mb-10">
+        <div className="inline-block px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--text-main)] text-[var(--bg-color)] mb-4">
+          {article.tag}
+        </div>
+        <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--text-main)] leading-tight mb-4">
+          {article.title}
+        </h1>
+        <div className="flex items-center justify-center gap-4 text-xs sm:text-sm text-[var(--text-light)] mb-6">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            {article.date}
+          </span>
+          <span>•</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            {article.readTime}
+          </span>
+        </div>
+        <p className="text-lg sm:text-xl text-[var(--text-muted)] font-light leading-relaxed max-w-3xl mx-auto italic border-l-2 sm:border-l-0 sm:border-y border-[var(--glass-border)] py-4 px-4 sm:px-0">
+          {article.subtitle}
+        </p>
+      </header>
+
+      {/* Article Body */}
+      <article className={`max-w-3xl mx-auto ${fontSizeClass}`}>
+        {renderContent()}
+      </article>
+
+      {/* Article Footer & Next Article Link */}
+      <div className="max-w-3xl mx-auto mt-16 pt-10 border-t border-[var(--glass-border)] flex flex-col sm:flex-row items-center justify-between gap-6">
+        {prevArticle ? (
+          <button
+            onClick={() => onNavigateArticle(prevArticle.id)}
+            className="flex flex-col items-start gap-1 p-4 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-[var(--glass-hover)] transition-all cursor-pointer w-full sm:w-1/2 text-left"
+          >
+            <span className="text-xs uppercase tracking-wider text-[var(--text-light)] flex items-center gap-1">
+              <ArrowLeft className="w-3 h-3" /> Previous Essay
+            </span>
+            <span className="font-heading font-bold text-sm sm:text-base text-[var(--text-main)] line-clamp-1">
+              {prevArticle.shortTitle}
+            </span>
+          </button>
+        ) : (
+          <div className="hidden sm:block sm:w-1/2" />
+        )}
+
+        {nextArticle && nextArticle.id !== article.id && (
+          <button
+            onClick={() => onNavigateArticle(nextArticle.id)}
+            className="flex flex-col items-end gap-1 p-4 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-[var(--glass-hover)] transition-all cursor-pointer w-full sm:w-1/2 text-right"
+          >
+            <span className="text-xs uppercase tracking-wider text-[var(--text-light)] flex items-center gap-1">
+              Next Essay <ArrowRight className="w-3 h-3" />
+            </span>
+            <span className="font-heading font-bold text-sm sm:text-base text-[var(--text-main)] line-clamp-1">
+              {nextArticle.shortTitle}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// --- src/App.tsx ---
+
+
+
+
+
+
+
+type ViewMode = 'home' | 'blogs' | 'about' | 'contact' | 'privacy' | 'terms' | string;
+
+default function App() {
+  const [currentView, setCurrentView] = useState<ViewMode>('home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Theme state
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('alter-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('alter-theme', theme);
+  }, [theme]);
+
+  // Sync hash routing if user comes with a direct link (e.g. #post-period)
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        setCurrentView(hash);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const openView = (viewId: string) => {
+    setCurrentView(viewId);
+    window.location.hash = viewId;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const filteredArticles = ARTICLES.filter(art => {
+    const matchesSearch =
+      art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      art.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      art.tag.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCat = selectedCategory === 'all' || art.category === selectedCategory;
+    return matchesSearch && matchesCat;
+  });
+
+  const isArticleView = currentView.startsWith('post-');
+
+  return (
+    <div className="relative min-h-screen text-[var(--text-main)] transition-colors duration-300">
+      {/* Dynamic Ambient Blur Mesh */}
+      <div className="bg-mesh" aria-hidden="true" />
+
+      {/* Main Container */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-32">
+        {/* ================= HOME VIEW ================= */}
+        {currentView === 'home' && (
+          <section className="animate-in fade-in duration-500">
+            {/* Hero (Pure and minimal) */}
+            <div className="text-center mb-12 sm:mb-16 pt-4">
+              <h1 className="font-heading text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-[var(--text-main)] mb-4">
+                Alter
+              </h1>
+              <p className="text-lg sm:text-xl text-[var(--text-muted)] max-w-2xl mx-auto font-light leading-relaxed">
+                Dispatches and essays on education, society, and culture. A sanctuary for focused reading.
+              </p>
+            </div>
+
+            {/* Bento Grid (Showing ONLY latest three blogs on home screen) */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-5xl mx-auto">
+              {/* Spotlight: The Country Half Its People Cannot Freely Move Through */}
+              <div
+                onClick={() => openView('post-movement')}
+                className="md:col-span-12 p-8 sm:p-12 rounded-3xl border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[var(--glass-shadow)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--text-main)] text-[var(--bg-color)]">
+                      Society & Human Rights
+                    </span>
+                  </div>
+                  <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl font-bold text-[var(--text-main)] mb-4 leading-tight group-hover:text-[var(--text-muted)] transition-colors">
+                    The Country Half Its People Cannot Freely Move Through: Patriarchy, Harassment, and the Family Travel Trap
+                  </h2>
+                  <p className="text-[var(--text-muted)] text-base sm:text-lg leading-relaxed mb-6 line-clamp-3">
+                    In the streets, villages, and even homes of Bangladesh in 2026, women and children live in perpetual fear. No neighbourhood feels safe. No hour of the day guarantees security. Almost daily, reports emerge of rape, gang rape, sexual assault, and murders following these violations. This is not a sporadic crisis; it is a national emergency that exposes the hollow promises of governance.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-light)] font-medium pt-2 border-t border-[var(--glass-border)]">
+                  <Clock className="w-4 h-4" />
+                  <span>12 min read • Oct 5, 2026</span>
+                </div>
+              </div>
+
+              {/* Half Card 1: Why Does Half the Population Bleed in Silence? */}
+              <div
+                onClick={() => openView('post-period')}
+                className="md:col-span-6 p-7 sm:p-8 rounded-3xl border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[var(--glass-shadow)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--text-main)] text-[var(--bg-color)] mb-4">
+                    Society & Health
+                  </span>
+                  <h2 className="font-heading text-xl sm:text-2xl font-bold text-[var(--text-main)] mb-3 leading-snug group-hover:text-[var(--text-muted)] transition-colors">
+                    Why Does Half the Population Bleed in Silence?
+                  </h2>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed mb-6 line-clamp-3">
+                    Every single month, roughly half the people in Bangladesh and South Asia who are of reproductive age go through something that is completely normal, biologically unremarkable, and utterly essential to human continuation — and yet, somehow, it remains one of the most unspeakable subjects in the region.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[var(--text-light)] font-medium pt-2 border-t border-[var(--glass-border)]">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>8 min read • Sept 9, 2026</span>
+                </div>
+              </div>
+
+              {/* Half Card 2: Free Tabs for SSC Toppers */}
+              <div
+                onClick={() => openView('post-tabs')}
+                className="md:col-span-6 p-7 sm:p-8 rounded-3xl border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[var(--glass-shadow)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--text-main)] text-[var(--bg-color)] mb-4">
+                    Technology & Policy
+                  </span>
+                  <h2 className="font-heading text-xl sm:text-2xl font-bold text-[var(--text-main)] mb-3 leading-snug group-hover:text-[var(--text-muted)] transition-colors">
+                    Free Tabs for SSC Toppers
+                  </h2>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed mb-6 line-clamp-3">
+                    A look at the newly announced device giveaway for SSC 2026's GPA-5 achievers, read against the country's track record with the Doel laptop and its unresolved e-waste crisis.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[var(--text-light)] font-medium pt-2 border-t border-[var(--glass-border)]">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>6 min read • Sept 9, 2026</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Link to full Journal */}
+            <div className="mt-10 text-center">
+              <button
+                onClick={() => openView('blogs')}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--glass-hover)] transition-all cursor-pointer group shadow-sm"
+              >
+                <span>Explore all dispatches in The Journal</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* ================= JOURNAL / BLOGS VIEW ================= */}
+        {currentView === 'blogs' && (
+          <section className="animate-in fade-in duration-500 max-w-4xl mx-auto">
+            {/* Newspaper Header */}
+            <div className="text-center mb-10">
+              <h1 className="font-heading text-4xl sm:text-6xl font-bold tracking-tight text-[var(--text-main)] mb-2">
+                The Journal
+              </h1>
+              <div className="text-xs sm:text-sm uppercase tracking-widest text-[var(--text-light)] font-semibold mb-6">
+                Latest Dispatches & Essays
+              </div>
+              <div className="border-t-4 border-b border-[var(--text-main)] h-2.5 mx-auto w-full max-w-3xl" />
+            </div>
+
+            {/* Filter and Search */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-light)]" />
+                <input
+                  type="text"
+                  placeholder="Search dispatches..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-sm text-[var(--text-main)] placeholder-[var(--text-light)] focus:outline-none focus:ring-2 focus:ring-[var(--text-main)]"
+                />
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { id: 'all', label: 'All' },
+                  { id: 'society', label: 'Society & Rights' },
+                  { id: 'policy', label: 'Policy & Tech' },
+                  { id: 'education', label: 'Education' }
+                ].map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                      selectedCategory === cat.id
+                        ? 'bg-[var(--text-main)] text-[var(--bg-color)] shadow-sm'
+                        : 'bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Newspaper Feed */}
+            <div className="flex flex-col gap-12">
+              {filteredArticles.length === 0 ? (
+                <div className="text-center py-16 text-[var(--text-muted)]">
+                  <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                  <p>No dispatches found matching your search.</p>
+                </div>
+              ) : (
+                filteredArticles.map((art, idx) => (
+                  <article
+                    key={art.id}
+                    className={`pb-12 ${
+                      idx !== filteredArticles.length - 1 ? 'border-b border-[var(--glass-border)]' : ''
+                    }`}
+                  >
+                    <div className="text-xs uppercase tracking-wider text-[var(--text-light)] font-semibold mb-2">
+                      {art.date} • {art.readTime}
+                    </div>
+                    <h2
+                      onClick={() => openView(art.id)}
+                      className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-main)] mb-3 leading-snug cursor-pointer hover:text-[var(--text-muted)] transition-colors"
+                    >
+                      {art.title}
+                    </h2>
+                    <p className="text-[var(--text-muted)] text-base sm:text-lg leading-relaxed mb-4 text-justify">
+                      {art.excerpt}
+                    </p>
+                    <button
+                      onClick={() => openView(art.id)}
+                      className="inline-block text-sm font-semibold text-[var(--text-main)] border-b border-[var(--text-main)] pb-0.5 hover:opacity-75 transition-opacity cursor-pointer"
+                    >
+                      Read Full Article →
+                    </button>
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ================= ARTICLE VIEW ================= */}
+        {isArticleView && (
+          <section className="animate-in fade-in duration-500">
+            <ArticleView
+              articleId={currentView}
+              onBack={() => openView('blogs')}
+              onNavigateArticle={id => openView(id)}
+            />
+          </section>
+        )}
+
+        {/* ================= ABOUT VIEW ================= */}
+        {currentView === 'about' && (
+          <section className="animate-in fade-in duration-500 max-w-3xl mx-auto">
+            <h1 className="font-heading text-4xl sm:text-6xl font-bold tracking-tight text-[var(--text-main)] text-center mb-3">
+              About Alter
+            </h1>
+            <p className="text-xl text-[var(--text-muted)] text-center font-light mb-12">
+              A sanctuary for focused reading.
+            </p>
+
+            <div className="editorial-prose">
+              <p>
+                Alter was born out of a desire to strip away the noise of the modern web. In an era of infinite scrolling, aggressive pop-ups, and visual clutter, we wanted to create a space that respects the reader's attention.
+              </p>
+
+              <h2>Our Philosophy</h2>
+              <p>
+                We believe that digital experiences should feel as premium and tactile as a high-fashion editorial magazine. We believe in creating a sense of depth and hierarchy without relying on heavy, distracting imagery.
+              </p>
+
+              <p>
+                Typography is our primary medium. The contrast between the elegant, structural strokes of Playfair Display and the clean, utilitarian geometry of Inter creates a tension that is both beautiful and highly readable.
+              </p>
+
+              <h2>The Mission</h2>
+              <p>
+                To provide thorough, rigorous dispatches on critical social developments, policy debates, and human rights issues in Bangladesh and South Asia that demand clear, honest inspection rather than polite silence.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* ================= CONTACT VIEW ================= */}
+        {currentView === 'contact' && (
+          <section className="animate-in fade-in duration-500 max-w-3xl mx-auto">
+            <h1 className="font-heading text-4xl sm:text-6xl font-bold tracking-tight text-[var(--text-main)] text-center mb-3">
+              Get in Touch
+            </h1>
+            <p className="text-lg sm:text-xl text-[var(--text-muted)] text-center font-light mb-12">
+              Have a project in mind or just want to say hello? Send us a message.
+            </p>
+
+            <ContactForm />
+          </section>
+        )}
+
+        {/* ================= PRIVACY POLICY VIEW ================= */}
+        {currentView === 'privacy' && (
+          <section className="animate-in fade-in duration-500 max-w-3xl mx-auto">
+            <h1 className="font-heading text-4xl sm:text-5xl font-bold text-[var(--text-main)] text-center mb-2">
+              Privacy Policy
+            </h1>
+            <p className="text-sm text-[var(--text-light)] text-center mb-10">Last updated: July 2026</p>
+
+            <div className="editorial-prose">
+              <h2>1. Data Collection</h2>
+              <p>
+                We believe in data minimalism. Alter only collects the information strictly necessary to provide you with a seamless reading experience. We do not use third-party tracking cookies or invasive analytics.
+              </p>
+
+              <h2>2. Use of Information</h2>
+              <p>
+                Any information submitted through our contact forms is used solely for the purpose of responding to your inquiry. We will never sell, rent, or distribute your email address to third parties.
+              </p>
+
+              <h2>3. Local Storage</h2>
+              <p>
+                We use local browser storage to save your reading preferences (such as your Light/Dark theme settings) to ensure a consistent experience across sessions. This data never leaves your device.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* ================= TERMS VIEW ================= */}
+        {currentView === 'terms' && (
+          <section className="animate-in fade-in duration-500 max-w-3xl mx-auto">
+            <h1 className="font-heading text-4xl sm:text-5xl font-bold text-[var(--text-main)] text-center mb-2">
+              Terms of Service
+            </h1>
+            <p className="text-sm text-[var(--text-light)] text-center mb-10">Please read these terms carefully before using Alter.</p>
+
+            <div className="editorial-prose">
+              <h2>1. Acceptance of Terms</h2>
+              <p>
+                By accessing and using Alter, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.
+              </p>
+
+              <h2>2. Intellectual Property</h2>
+              <p>
+                All content published on Alter, including text, typography choices, layout design, and code structure, is the property of Alter Studio. You may not reproduce, distribute, or create derivative works without explicit permission.
+              </p>
+
+              <h2>3. User Conduct</h2>
+              <p>
+                Users agree to use the site for lawful purposes only. Any attempt to compromise the security of the site, bypass navigation structures, or scrape content automatically is strictly prohibited.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* Subtle Editorial Footer */}
+        <footer className="mt-24 pt-8 border-t border-[var(--glass-border)] text-center text-xs text-[var(--text-light)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 Alter. Dispatches and essays on education, society, and culture.</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => openView('privacy')}
+              className="hover:text-[var(--text-main)] transition-colors cursor-pointer"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => openView('terms')}
+              className="hover:text-[var(--text-main)] transition-colors cursor-pointer"
+            >
+              Terms of Service
+            </button>
+          </div>
+        </footer>
+      </main>
+
+      {/* Floating Bottom Navigation (Optimized for mobile) */}
+      <BottomNav
+        currentView={currentView}
+        onSelectView={openView}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+    </script>
+  </body>
+</html>
